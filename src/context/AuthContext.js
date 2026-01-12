@@ -9,6 +9,14 @@ export const AuthProvider = ({ children }) => {
   const [users, setUsers] = useState([]); // In-memory user storage for demo
 
   const signIn = (email, password) => {
+    // ⚠️ SECURITY WARNING: This is for DEMO purposes only!
+    // In production, NEVER store or compare passwords in plain text.
+    // Use proper authentication with a secure backend API that handles:
+    // - Password hashing (bcrypt, Argon2, etc.)
+    // - Salting
+    // - Secure token generation (JWT)
+    // - HTTPS communication
+    
     // Find user in our in-memory storage
     const foundUser = users.find(
       u => u.email === email && u.password === password
@@ -22,6 +30,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const createAccount = (email, password, phone) => {
+    // ⚠️ SECURITY WARNING: This is for DEMO purposes only!
+    // In production, NEVER store passwords in plain text.
+    // Always use a secure backend API with proper password hashing.
+    
     // Check if user already exists
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {

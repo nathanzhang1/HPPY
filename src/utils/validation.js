@@ -39,20 +39,26 @@ export const validatePassword = (password) => {
 };
 
 // Phone number validation - Basic format check
-// Accepts formats like: (123) 456-7890, 123-456-7890, 1234567890, +1234567890
+// Accepts formats like: (123) 456-7890, 123-456-7890, 1234567890, +1-234-567-8900
 export const validatePhone = (phone) => {
-  const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   if (!phone) {
     return { valid: false, message: 'Phone number is required' };
   }
   // Remove all non-numeric characters for validation
   const cleanPhone = phone.replace(/\D/g, '');
-  if (cleanPhone.length < 10) {
-    return { valid: false, message: 'Phone number must be at least 10 digits' };
+  
+  // Must have exactly 10 or 11 digits (11 for country code like +1)
+  if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+    return { valid: false, message: 'Phone number must be 10-11 digits' };
   }
+  
+  // At this point we know we have the right number of digits
+  // Just check that the format looks reasonable (no invalid characters, proper structure)
+  const phoneRegex = /^[\+]?[1]?[-.\s]?[(]?[0-9]{3}[)]?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/;
   if (!phoneRegex.test(phone)) {
-    return { valid: false, message: 'Please enter a valid phone number' };
+    return { valid: false, message: 'Please enter a valid phone number format' };
   }
+  
   return { valid: true, message: '' };
 };
 
