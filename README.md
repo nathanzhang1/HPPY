@@ -2,6 +2,13 @@
 
 A mobile authentication starter app built with React Native and Expo, featuring industry-standard security practices and user-friendly authentication flows.
 
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in 5 minutes
+- **[Architecture Guide](ARCHITECTURE.md)** - Detailed app structure and flow diagrams
+- **[Screenshots & UI Guide](SCREENSHOTS.md)** - Visual mockups and design details
+- **[Assets Guide](assets/README.md)** - How to set up app icons and splash screens
+
 ## Features
 
 - ✅ **Create Account** with comprehensive validation
