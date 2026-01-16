@@ -35,13 +35,18 @@ export default function Input({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           editable={editable}
+          accessibilityLabel={label || placeholder}
+          accessibilityHint={`Enter your ${label ? label.toLowerCase() : 'input'}`}
         />
         {secureTextEntry && (
           <TouchableOpacity 
             style={styles.eyeButton}
             onPress={() => setShowPassword(!showPassword)}
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            accessibilityHint="Toggles the visibility of the password"
           >
-            <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</Text>
+            <Text style={styles.eyeText}>{showPassword ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -91,7 +96,9 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   eyeText: {
-    fontSize: 20,
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
   errorText: {
     color: '#FF3B30',

@@ -244,10 +244,43 @@ Possible additions for production use:
 
 ### Common Issues
 
-1. **"Metro bundler error"**
+1. **"EMFILE: too many open files" error**
+   - This is a macOS/Linux file watcher limit issue
+   - **Solution 1 (macOS):** Increase the file watcher limit:
+     ```bash
+     # Check current limit
+     ulimit -n
+     
+     # Increase limit temporarily (until restart)
+     ulimit -n 10240
+     
+     # For permanent fix, add to ~/.zshrc or ~/.bash_profile:
+     echo "ulimit -n 10240" >> ~/.zshrc
+     ```
+   - **Solution 2 (Linux):** 
+     ```bash
+     # Add to /etc/sysctl.conf
+     sudo sh -c "echo fs.inotify.max_user_watches=524288 >> /etc/sysctl.conf"
+     sudo sysctl -p
+     ```
+   - **Solution 3:** Clear node_modules and reinstall:
+     ```bash
+     rm -rf node_modules package-lock.json
+     npm install
+     ```
+   - **Solution 4:** Use watchman (recommended for React Native development):
+     ```bash
+     # macOS
+     brew install watchman
+     
+     # Linux
+     # Follow instructions at https://facebook.github.io/watchman/docs/install
+     ```
+
+2. **"Metro bundler error"**
    - Clear cache: `expo start -c`
 
-2. **"Cannot connect to Metro"**
+3. **"Cannot connect to Metro"**
    - Ensure your device and computer are on the same network
    - Try using tunnel mode: `expo start --tunnel`
 

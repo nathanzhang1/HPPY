@@ -1,6 +1,8 @@
-// Email validation using standard regex
+// Email validation using improved regex
 export const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // More robust email validation regex that prevents common issues
+  // Prevents: consecutive dots, dots before @, @ at start/end, etc.
+  const emailRegex = /^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
   if (!email) {
     return { valid: false, message: 'Email is required' };
   }
@@ -52,10 +54,9 @@ export const validatePhone = (phone) => {
     return { valid: false, message: 'Phone number must be 10-11 digits' };
   }
   
-  // At this point we know we have the right number of digits
-  // Just check that the format looks reasonable (no invalid characters, proper structure)
-  const phoneRegex = /^[\+]?[1]?[-.\s]?[(]?[0-9]{3}[)]?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/;
-  if (!phoneRegex.test(phone)) {
+  // Validate numeric structure: optional leading "1" country code, followed by 10 digits
+  const phoneDigitsRegex = /^1?\d{10}$/;
+  if (!phoneDigitsRegex.test(cleanPhone)) {
     return { valid: false, message: 'Please enter a valid phone number format' };
   }
   

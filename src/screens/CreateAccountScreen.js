@@ -20,6 +20,9 @@ import {
   validateConfirmPassword,
 } from '../utils/validation';
 
+// Simulated network delay for demo purposes
+const SIMULATED_NETWORK_DELAY = 500;
+
 export default function CreateAccountScreen({ navigation }) {
   const { createAccount } = useAuth();
   const [email, setEmail] = useState('');
@@ -71,7 +74,7 @@ export default function CreateAccountScreen({ navigation }) {
       } else {
         Alert.alert('Success', 'Your account has been created successfully!');
       }
-    }, 500);
+    }, SIMULATED_NETWORK_DELAY);
   };
 
   return (

@@ -15,6 +15,9 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import { validateEmail } from '../utils/validation';
 
+// Simulated network delay for demo purposes
+const SIMULATED_NETWORK_DELAY = 500;
+
 export default function SignInScreen({ navigation }) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
@@ -53,7 +56,7 @@ export default function SignInScreen({ navigation }) {
       if (!result.success) {
         Alert.alert('Sign In Failed', result.error);
       }
-    }, 500);
+    }, SIMULATED_NETWORK_DELAY);
   };
 
   return (

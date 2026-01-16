@@ -17,9 +17,12 @@ export const AuthProvider = ({ children }) => {
     // - Secure token generation (JWT)
     // - HTTPS communication
     
+    // Normalize email to lowercase for case-insensitive comparison
+    const normalizedEmail = email.toLowerCase();
+    
     // Find user in our in-memory storage
     const foundUser = users.find(
-      u => u.email === email && u.password === password
+      u => u.email === normalizedEmail && u.password === password
     );
 
     if (foundUser) {
@@ -34,16 +37,19 @@ export const AuthProvider = ({ children }) => {
     // In production, NEVER store passwords in plain text.
     // Always use a secure backend API with proper password hashing.
     
+    // Normalize email to lowercase to prevent duplicate accounts with different cases
+    const normalizedEmail = email.toLowerCase();
+    
     // Check if user already exists
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = users.find(u => u.email === normalizedEmail);
     if (existingUser) {
       return { success: false, error: 'An account with this email already exists' };
     }
 
     // Create new user
-    const newUser = { email, password, phone };
+    const newUser = { email: normalizedEmail, password, phone };
     setUsers([...users, newUser]);
-    setUser({ email, phone });
+    setUser({ email: normalizedEmail, phone });
     return { success: true };
   };
 
