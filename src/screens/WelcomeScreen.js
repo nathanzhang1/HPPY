@@ -4,24 +4,21 @@ import {
   Text,
   StyleSheet,
   Image,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import AnimatedBackground from '../components/AnimatedBackground';
 
-const { width, height } = Dimensions.get('window');
-
 export default function WelcomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
+      {/* Dark status bar so icons are visible on white top */}
       <StatusBar style="dark" />
       
-      {/* Animated Morphing Background */}
-      <AnimatedBackground />
+      {/* No blur on welcome screen */}
+      <AnimatedBackground blur={false} />
 
-      {/* Content */}
       <SafeAreaView style={styles.content}>
         <View style={styles.logoContainer}>
           <Image
@@ -32,10 +29,10 @@ export default function WelcomeScreen({ navigation }) {
           <Text style={styles.title}>HPPY</Text>
         </View>
 
-        <View style={styles.buttonContainer}>
+        <View style={styles. buttonContainer}>
           <TouchableOpacity
             style={styles.createAccountButton}
-            onPress={() => navigation.navigate('CreateAccount')}
+            onPress={() => navigation.navigate('PhoneEntry')}
             activeOpacity={0.8}
           >
             <Text style={styles.createAccountText}>Create Account</Text>
@@ -44,7 +41,7 @@ export default function WelcomeScreen({ navigation }) {
           <View style={styles.buttonSpacing} />
 
           <TouchableOpacity
-            style={styles.signInButton}
+            style={styles. signInButton}
             onPress={() => navigation.navigate('SignIn')}
             activeOpacity={0.8}
           >
@@ -58,9 +55,7 @@ export default function WelcomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex:  1,
-    backgroundColor: '#FFFFFF',
-    overflow: 'hidden',
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -78,21 +73,21 @@ const styles = StyleSheet.create({
     height: 100,
     marginBottom: 16,
   },
-  title: {
+  title:  {
     fontSize: 48,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    letterSpacing: 1,
+    letterSpacing: 4,
   },
   buttonContainer: {
     width: '100%',
   },
   buttonSpacing: {
-    height: 16,
+    height:  16,
   },
   createAccountButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius:  25,
+    borderRadius: 25,
     paddingVertical: 16,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -101,12 +96,12 @@ const styles = StyleSheet.create({
   createAccountText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#C44569',
+    color: '#C9449A',
   },
   signInButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 25,
-    paddingVertical: 16,
+    paddingVertical:  16,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
