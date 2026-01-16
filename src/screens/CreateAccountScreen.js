@@ -3,22 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import {
-  validateEmail,
-  validatePassword,
-  validatePhone,
-  validateConfirmPassword,
-} from '../utils/validation';
+import { validateEmail, validatePassword, validatePhone } from '../utils/validation';
 
 // Simulated network delay for demo purposes
 const SIMULATED_NETWORK_DELAY = 500;
@@ -26,9 +21,9 @@ const SIMULATED_NETWORK_DELAY = 500;
 export default function CreateAccountScreen({ navigation }) {
   const { createAccount } = useAuth();
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [phone, setPhone] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -38,22 +33,21 @@ export default function CreateAccountScreen({ navigation }) {
 
     // Validate all inputs
     const emailValidation = validateEmail(email);
-    const passwordValidation = validatePassword(password);
-    const confirmPasswordValidation = validateConfirmPassword(password, confirmPassword);
     const phoneValidation = validatePhone(phone);
+    const passwordValidation = validatePassword(password);
 
     const newErrors = {};
     if (!emailValidation.valid) {
       newErrors.email = emailValidation.message;
     }
+    if (!phoneValidation. valid) {
+      newErrors.phone = phoneValidation.message;
+    }
     if (!passwordValidation.valid) {
       newErrors.password = passwordValidation.message;
     }
-    if (!confirmPasswordValidation.valid) {
-      newErrors.confirmPassword = confirmPasswordValidation.message;
-    }
-    if (!phoneValidation.valid) {
-      newErrors.phone = phoneValidation.message;
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -90,7 +84,7 @@ export default function CreateAccountScreen({ navigation }) {
         >
           <View style={styles.header}>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us today!</Text>
+            <Text style={styles. subtitle}>Join us today!</Text>
           </View>
 
           <View style={styles.form}>
@@ -100,7 +94,7 @@ export default function CreateAccountScreen({ navigation }) {
               onChangeText={setEmail}
               placeholder="Enter your email"
               keyboardType="email-address"
-              error={errors.email}
+              error={errors. email}
             />
 
             <Input
@@ -126,7 +120,7 @@ export default function CreateAccountScreen({ navigation }) {
               <Text style={styles.requirementItem}>• At least 8 characters</Text>
               <Text style={styles.requirementItem}>• One uppercase letter (A-Z)</Text>
               <Text style={styles.requirementItem}>• One lowercase letter (a-z)</Text>
-              <Text style={styles.requirementItem}>• One number (0-9)</Text>
+              <Text style={styles. requirementItem}>• One number (0-9)</Text>
               <Text style={styles.requirementItem}>• One special character (!@#$%^&*)</Text>
             </View>
 
@@ -167,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   keyboardView: {
-    flex: 1,
+    flex:  1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -184,37 +178,35 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize:  16,
     color: '#666',
   },
   form: {
     width: '100%',
   },
   passwordRequirements: {
-    backgroundColor: '#e8f4ff',
-    padding: 12,
+    backgroundColor: '#f0f0f0',
     borderRadius: 8,
+    padding: 12,
     marginBottom: 16,
-    marginTop: -8,
   },
   requirementsTitle: {
-    fontSize: 12,
+    fontSize:  12,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: '#666',
+    marginBottom: 8,
   },
   requirementItem: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#666',
-    marginLeft: 8,
-    marginTop: 2,
+    marginBottom: 4,
   },
-  footer: {
+  footer:  {
     marginTop: 24,
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 14,
+    fontSize:  14,
     color: '#666',
     marginBottom: 12,
   },

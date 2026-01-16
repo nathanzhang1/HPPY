@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
@@ -11,9 +12,9 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <View style={styles.content}>
-        <View style={styles.header}>
+        <View style={styles. header}>
           <Text style={styles.title}>Welcome!</Text>
-          <Text style={styles.subtitle}>You're successfully signed in</Text>
+          <Text style={styles. subtitle}>You're successfully signed in</Text>
         </View>
 
         <View style={styles.userInfo}>
@@ -45,9 +46,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   content: {
-    flex: 1,
+    flex:  1,
     padding: 24,
-    justifyContent: 'space-between',
+    justifyContent:  'space-between',
   },
   header: {
     marginTop: 40,
@@ -66,9 +67,9 @@ const styles = StyleSheet.create({
   userInfo: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    padding:  20,
+    shadowColor:  '#000',
+    shadowOffset:  { width: 0, height:  2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor:  '#f0f0f0',
   },
   label: {
     fontSize: 14,

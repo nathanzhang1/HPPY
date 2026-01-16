@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
 import Input from '../components/Input';
@@ -36,7 +36,7 @@ export default function SignInScreen({ navigation }) {
     if (!emailValidation.valid) {
       newErrors.email = emailValidation.message;
     }
-    if (!password) {
+    if (! password) {
       newErrors.password = 'Password is required';
     }
 
@@ -60,7 +60,7 @@ export default function SignInScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles. container}>
       <StatusBar style="dark" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -119,12 +119,12 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor:  '#f8f9fa',
   },
-  keyboardView: {
+  keyboardView:  {
     flex: 1,
   },
-  scrollContent: {
+  scrollContent:  {
     flexGrow: 1,
     padding: 24,
     justifyContent: 'center',
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 40,
   },
-  title: {
+  title:  {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#333',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     alignItems: 'center',
   },
-  footerText: {
+  footerText:  {
     fontSize: 14,
     color: '#666',
     marginBottom: 12,

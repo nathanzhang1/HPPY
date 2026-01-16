@@ -6,7 +6,9 @@ export default function Button({
   onPress, 
   variant = 'primary',
   loading = false,
-  disabled = false 
+  disabled = false,
+  style,
+  textStyle,
 }) {
   const isDisabled = disabled || loading;
 
@@ -14,8 +16,12 @@ export default function Button({
     <TouchableOpacity
       style={[
         styles.button,
-        variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
+        variant === 'primary' && styles.primaryButton,
+        variant === 'secondary' && styles.secondaryButton,
+        variant === 'white' && styles.whiteButton,
+        variant === 'glass' && styles.glassButton,
         isDisabled && styles.disabledButton,
+        style,
       ]}
       onPress={onPress}
       disabled={isDisabled}
@@ -24,14 +30,18 @@ export default function Button({
       accessibilityLabel={title}
       accessibilityState={{ disabled: isDisabled }}
     >
-      {loading ? (
+      {loading ?  (
         <ActivityIndicator color={variant === 'primary' ? '#fff' : '#007AFF'} />
       ) : (
         <Text
           style={[
-            styles.buttonText,
-            variant === 'primary' ? styles.primaryButtonText : styles.secondaryButtonText,
+            styles. buttonText,
+            variant === 'primary' && styles.primaryButtonText,
+            variant === 'secondary' && styles.secondaryButtonText,
+            variant === 'white' && styles.whiteButtonText,
+            variant === 'glass' && styles.glassButtonText,
             isDisabled && styles.disabledButtonText,
+            textStyle,
           ]}
         >
           {title}
@@ -41,10 +51,10 @@ export default function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet. create({
   button: {
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 25,
+    paddingVertical:  16,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -58,6 +68,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#007AFF',
   },
+  whiteButton: {
+    backgroundColor: '#FFFFFF',
+  },
+  glassButton: {
+    backgroundColor:  'rgba(255, 255, 255, 0.25)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
   disabledButton: {
     opacity: 0.5,
   },
@@ -69,7 +87,13 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   secondaryButtonText: {
-    color: '#007AFF',
+    color:  '#007AFF',
+  },
+  whiteButtonText: {
+    color: '#C44569', // Magenta/pink text
+  },
+  glassButtonText: {
+    color: '#FFFFFF',
   },
   disabledButtonText: {
     opacity: 0.7,
