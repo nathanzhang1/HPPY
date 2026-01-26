@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Image, 
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
+import ProgressBar from '../components/ProgressBar';
 import AddActivityModal from '../components/AddActivityModal';
 
-export default function HomeScreen() {
-  const { user, signOut } = useAuth();
+const { width } = Dimensions.get('window');
+const CARD_MARGIN = 16;
+const CARD_WIDTH = width - (CARD_MARGIN * 2);
+
+export default function HomeScreen({ navigation }) {
+  const { user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [activities, setActivities] = useState([]);
-
-  // Format phone number for display
-  const formatPhone = (phone) => {
-    if (!phone) return '';
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length === 10) {
-      return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-    }
-    if (cleaned.length === 11) {
-      return `+${cleaned.slice(0, 1)} (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-    }
-    return phone;
-  };
 
   const handleAddActivity = (activity, happiness) => {
     const newActivity = {
@@ -34,58 +34,192 @@ export default function HomeScreen() {
     setModalVisible(false);
   };
 
-  const renderActivityItem = ({ item }) => (
-    <View style={styles.activityItem}>
-      <Text style={styles.activityName}>{item.name}</Text>
-      <Text style={styles.activityHappiness}>{item.happiness}% happy</Text>
-    </View>
-  );
+  const handleProfilePress = () => {
+    console.log('Navigate to Profile');
+  };
+
+  const handleSanctuaryPress = () => {
+    console.log('Navigate to Sanctuary');
+  };
+
+  const handleShopPress = () => {
+    console.log('Navigate to Shop');
+  };
+
+  const handleDataPress = () => {
+    console.log('Navigate to Data');
+  };
+
+  const handleResourcesPress = () => {
+    console.log('Navigate to Resources');
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="dark" />
       
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome!</Text>
-          <Text style={styles.subtitle}>You're successfully signed in</Text>
-        </View>
-
-        {/* User Info */}
-        <View style={styles.userInfo}>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Phone:</Text>
-            <Text style={styles.value}>{formatPhone(user?.phone)}</Text>
-          </View>
-        </View>
-
-        {/* Activities List */}
-        <View style={styles.activitiesContainer}>
-          <Text style={styles.activitiesTitle}>Recent Activities</Text>
-          {activities.length === 0 ? (
-            <Text style={styles.emptyText}>No activities yet. Tap + to add one!</Text>
-          ) : (
-            <FlatList
-              data={activities}
-              renderItem={renderActivityItem}
-              keyExtractor={(item) => item.id}
-              style={styles.activitiesList}
-            />
-          )}
-        </View>
-
-        {/* Sign Out Button */}
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={signOut}
-            activeOpacity={0.8}
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Profile Card */}
+          <TouchableOpacity 
+            style={[styles.card, styles.profileCard]}
+            onPress={handleProfilePress}
+            activeOpacity={0.9}
           >
-            <Text style={styles.signOutButtonText}>Sign Out</Text>
+            <View style={styles.profileBackgroundContainer}>
+              <Image
+                source={require('../../assets/home/profile-background.png')}
+                style={styles.profileBackground}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.profileOverlay} />
+            
+            <View style={styles.profileContent}>
+              {/* Left side: Egg and Progress */}
+              <View style={styles.profileLeft}>
+                <Image
+                  source={require('../../assets/home/egg-icon.png')}
+                  style={styles.eggIcon}
+                  resizeMode="contain"
+                />
+                <ProgressBar progress={50} width={120} height={14} />
+              </View>
+
+              {/* Right side: Title and Button */}
+              <View style={styles.profileRight}>
+                <View style={styles.profileTextContainer}>
+                  <Image
+                    source={require('../../assets/home/wood-plank.png')}
+                    style={styles.woodPlankProfile}
+                    resizeMode="stretch"
+                  />
+                  <Text style={styles.profileTitle}>Complete Profile</Text>
+                </View>
+                <Text style={styles.profileDescription}>
+                  Fill out your profile to hatch your first egg
+                </Text>
+                <TouchableOpacity style={styles.getStartedButton}>
+                  <Text style={styles.getStartedText}>Get Started</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </TouchableOpacity>
-        </View>
-      </View>
+
+          {/* Sanctuary Card */}
+          <TouchableOpacity 
+            style={[styles.card, styles.sanctuaryCard]}
+            onPress={handleSanctuaryPress}
+            activeOpacity={0.9}
+          >
+            <View style={styles.sanctuaryBackgroundContainer}>
+              <Image
+                source={require('../../assets/home/sanctuary-background.png')}
+                style={styles.sanctuaryBackground}
+                resizeMode="cover"
+              />
+            </View>
+            
+            <View style={styles.sanctuaryHeader}>
+              <Image
+                source={require('../../assets/home/wood-plank.png')}
+                style={styles.woodPlankSanctuary}
+                resizeMode="stretch"
+              />
+              <Text style={styles.sanctuaryTitle}>Sanctuary</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Bottom Row: Shop and Data */}
+          <View style={styles.bottomRow}>
+            {/* Shop Card */}
+            <TouchableOpacity 
+              style={[styles.card, styles.shopCard]}
+              onPress={handleShopPress}
+              activeOpacity={0.9}
+            >
+              <View style={styles.shopBackgroundContainer}>
+                <Image
+                  source={require('../../assets/home/shop-background.png')}
+                  style={styles.shopBackground}
+                  resizeMode="cover"
+                />
+              </View>
+              
+              <View style={styles.shopContent}>
+                <View style={styles.shopFooter}>
+                  <View style={styles.coinBubble}>
+                    <Image
+                      source={require('../../assets/home/coin-icon.png')}
+                      style={styles.coinIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.coinCount}>0</Text>
+                  </View>
+                  <View style={styles.shopBubble}>
+                    <Text style={styles.shopLabel}>Shop</Text>
+                  </View>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* Data Card */}
+            <TouchableOpacity 
+              style={[styles.card, styles.dataCard]}
+              onPress={handleDataPress}
+              activeOpacity={0.9}
+            >
+              <View style={styles.dataBackgroundContainer}>
+                <Image
+                  source={require('../../assets/home/data-background.png')}
+                  style={styles.dataBackground}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.dataOverlay} />
+              
+              <Image
+                source={require('../../assets/home/data-chart.png')}
+                style={styles.dataChart}
+                resizeMode="contain"
+              />
+              
+              <View style={styles.dataHeader}>
+                <Image
+                  source={require('../../assets/home/wood-plank.png')}
+                  style={styles.woodPlankData}
+                  resizeMode="stretch"
+                />
+                <Text style={styles.dataTitle}>Data</Text>
+              </View>
+
+              {/* Explore Bubble */}
+              <View style={styles.exploreBubble}>
+                <Text style={styles.exploreText}>Explore</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Mental Health Resources Card */}
+          <TouchableOpacity 
+            style={[styles.card, styles.resourcesCard]}
+            onPress={handleResourcesPress}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.resourcesTitle}>Mental Health Resources</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+
+      <Image
+        source={require('../../assets/onboarding/background-glow.png')}
+        style={styles.addButtonGradient}
+        resizeMode="contain"
+      />
 
       {/* Floating Add Button */}
       <TouchableOpacity
@@ -100,136 +234,369 @@ export default function HomeScreen() {
         />
       </TouchableOpacity>
 
-      {/* Add Activity Modal */}
       <AddActivityModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSave={handleAddActivity}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F5F5F5',
   },
-  content: {
+  safeArea: {
     flex: 1,
-    padding: 24,
   },
-  header: {
-    marginTop: 20,
-    marginBottom: 24,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  userInfo: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  value: {
-    fontSize: 14,
-    color: '#333',
-  },
-  activitiesContainer: {
+  scrollView: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  activitiesTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  scrollContent: {
+    padding: CARD_MARGIN,
+    paddingBottom: 100,
+  },
+
+  // Base Card Style
+  card: {
+    width: CARD_WIDTH,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+
+  // Profile Card
+  profileCard: {
+    height: 158,
     marginBottom: 16,
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#67D375',
   },
-  emptyText: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-    marginTop: 20,
+  profileBackgroundContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
   },
-  activitiesList: {
+  profileBackground: {
+    position: 'absolute',
+    width: '110%',
+    height: '100%',
+    top: 0,
+    right: -10,
+  },
+  profileOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#3D5E4ACC',
+    borderRadius: 20,
+  },
+  profileContent: {
     flex: 1,
-  },
-  activityItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    padding: 16,
   },
-  activityName: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  activityHappiness: {
-    fontSize: 14,
-    color: '#C9449A',
-    fontWeight: '600',
-  },
-  footer: {
-    marginTop: 20,
-  },
-  signOutButton: {
-    backgroundColor: '#C9449A',
-    borderRadius: 25,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+  profileLeft: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 16,
   },
-  signOutButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  eggIcon: {
+    width: 100,
+    height: 100,
+    marginBottom: 8,
+  },
+  profileRight: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  profileTextContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    height: 40,
+  },
+  woodPlankProfile: {
+    position: 'absolute',
+    width: 240,
+    height: 500,
+    top: -30,
+    right: -25,
+  },
+  profileTitle: {
+    position: 'absolute',
+    fontFamily: 'Sigmar',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    width: 220,
+    bottom: 5,
+    right: -45,
+  },
+  profileDescription: {
+    fontSize: 17,
+    width: 192,
     color: '#FFFFFF',
+    textAlign: 'left',
+    marginBottom: 10,
+    lineHeight: 20,
+    fontWeight: 500,
   },
+  getStartedButton: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  getStartedText: {
+    fontSize: 15,
+    color: '#177023',
+  },
+
+  // Sanctuary Card
+  sanctuaryCard: {
+    height: 246,
+    marginBottom: 16,
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#75383B',
+  },
+  sanctuaryBackgroundContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  sanctuaryBackground: {
+    position: 'absolute',
+    width: '110%',
+    height: '120%',
+    top: -45,
+    left: -17,
+  },
+  sanctuaryHeader: {
+    alignItems: 'center',
+    position: 'relative',
+    bottom: 20,
+  },
+  woodPlankSanctuary: {
+    width: 400,
+    height: 500,
+  },
+  sanctuaryTitle: {
+    position: 'absolute',
+    top: 32,
+    fontFamily: 'Sigmar',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+
+  // Bottom Row
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 16,
+  },
+
+  // Shop Card
+  shopCard: {
+    flex: 1,
+    height: 278,
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#225987',
+  },
+  shopBackgroundContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  shopBackground: {
+    position: 'absolute',
+    width: '115%',
+    height: '115%',
+    top: -20,
+    left: -20,
+  },
+  shopContent: {
+    flex: 1,
+  },
+  shopFooter: {
+    position: 'absolute',
+    bottom: 8,
+    left: 12,
+    right: 12,
+    alignItems: 'center',
+    gap: 4,
+    flexDirection: 'row'
+  },
+  coinBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    gap: 18,
+  },
+  coinIcon: {
+    width: 24,
+    height: 24,
+  },
+  coinCount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#225987',
+  },
+  shopBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  shopLabel: {
+    fontSize: 16,
+    color: '#225987',
+  },
+
+  // Data Card
+  dataCard: {
+    flex: 1,
+    height: 278,
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#B33AE4',
+  },
+  dataBackgroundContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  dataBackground: {
+    position: 'absolute',
+    width: '140%',
+    height: '140%',
+    top: -30,
+    left: -25,
+  },
+  dataOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1E0329CC',
+    borderRadius: 20,
+  },
+  dataChart: {
+    position: 'absolute',
+    bottom: 40,
+    left: 10,
+    right: 40,
+    width: '85%',
+    height: 180,
+  },
+  dataHeader: {
+    alignItems: 'center',
+    paddingTop: 16,
+    position: 'relative',
+  },
+  woodPlankData: {
+    width: 170,
+    height: 500,
+    bottom: 35,
+  },
+  dataTitle: {
+    position: 'absolute',
+    top: 15,
+    fontFamily: 'Sigmar',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  exploreBubble: {
+    position: 'absolute',
+    bottom: 8,
+    right: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  exploreText: {
+    fontSize: 16,
+    color: '#333',
+  },
+
+  // Resources Card
+  resourcesCard: {
+    height: 62,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F2DAB3',
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#75383B',
+  },
+  resourcesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#5D4037',
+  },
+
+  // Add Button Gradient Glow (PNG - behind button)
+  addButtonGradient: {
+    position: 'absolute',
+    bottom: -25, // Adjust to center behind button
+    right: -40, // Adjust to center behind button
+    width: 200, // Size of gradient glow
+    height: 200,
+    zIndex: 0, // Behind the button
+  },
+
+  // Floating Add Button (on top)
   addButton: {
     position: 'absolute',
     bottom: 40,
     right: 24,
     width: 70,
     height: 70,
-    shadowColor: '#C9449A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    zIndex: 1, // On top of gradient
   },
   addButtonImage: {
     width: 70,

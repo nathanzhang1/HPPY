@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Font from 'expo-font';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { AnimatedBackgroundProvider } from './src/context/AnimatedBackgroundContext';
 import WelcomeScreen from './src/screens/WelcomeScreen';
@@ -16,11 +17,6 @@ const Stack = createNativeStackNavigator();
 function AppNavigator() {
   const { user, hasCompletedOnboarding } = useAuth();
 
-  console.log('Navigation State:', { 
-    hasUser: !!user, 
-    hasCompletedOnboarding 
-  }); // Debug log
-
   return (
     <Stack.Navigator 
       screenOptions={{ 
@@ -30,7 +26,6 @@ function AppNavigator() {
       }}
     >
       {!user ? (
-        // User is not authenticated - show auth screens
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="PhoneEntry" component={PhoneEntryScreen} />
@@ -38,10 +33,8 @@ function AppNavigator() {
           <Stack.Screen name="SignIn" component={SignInScreen} />
         </>
       ) : !hasCompletedOnboarding ? (
-        // User is authenticated but hasn't completed onboarding
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
-        // User is authenticated and has completed onboarding
         <Stack.Screen name="Home" component={HomeScreen} />
       )}
     </Stack.Navigator>
@@ -49,6 +42,22 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'Sigmar': require('./assets/fonts/Sigmar-Regular.ttf'),
+      });
+      setFontsLoaded(true);
+    }
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Or a loading screen
+  }
+
   return (
     <SafeAreaProvider>
       <AnimatedBackgroundProvider>
