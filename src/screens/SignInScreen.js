@@ -63,7 +63,7 @@ export default function SignInScreen({ navigation }) {
       <View style={styles.container}>
         <StatusBar style="dark" />
         
-        <AnimatedBackground blur={true} blurIntensity={80} />
+        <AnimatedBackground blur={true} blurIntensity={30} />
         
         <SafeAreaView style={styles.content} edges={['top', 'left', 'right']}>
           <KeyboardAvoidingView

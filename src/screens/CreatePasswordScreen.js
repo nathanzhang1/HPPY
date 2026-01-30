@@ -65,7 +65,7 @@ export default function CreatePasswordScreen({ navigation, route }) {
       <View style={styles.container}>
         <StatusBar style="dark" />
         
-        <AnimatedBackground blur={true} blurIntensity={80} />
+        <AnimatedBackground blur={true} blurIntensity={30} />
         
         <SafeAreaView style={styles.content} edges={['top', 'left', 'right']}>
           <KeyboardAvoidingView

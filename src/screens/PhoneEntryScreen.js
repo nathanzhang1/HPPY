@@ -36,7 +36,7 @@ export default function PhoneEntryScreen({ navigation }) {
       <View style={styles.container}>
         <StatusBar style="dark" />
         
-        <AnimatedBackground blur={true} blurIntensity={80} />
+        <AnimatedBackground blur={true} blurIntensity={30} />
         
         <SafeAreaView style={styles.content} edges={['top', 'left', 'right']}>
           <KeyboardAvoidingView
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 16,
     // Subtle dark outline effect
-    textShadowColor:  'rgba(0, 0, 0, 0.3)',
+    textShadowColor:  'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
   },
