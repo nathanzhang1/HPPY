@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
-import ProgressBar from '../components/ProgressBar';
+import TempProgressBar from '../components/TempProgressBar';
 import AddActivityModal from '../components/AddActivityModal';
 
 const { width } = Dimensions.get('window');
@@ -35,7 +35,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleProfilePress = () => {
-    console.log('Navigate to Profile');
+    navigation.navigate('ProfileCompletion');
   };
 
   const handleSanctuaryPress = () => {
@@ -87,7 +87,7 @@ export default function HomeScreen({ navigation }) {
                   style={styles.eggIcon}
                   resizeMode="contain"
                 />
-                <ProgressBar progress={50} width={120} height={14} />
+                <TempProgressBar progress={50} width={120} height={14} />
               </View>
 
               {/* Right side: Title and Button */}
@@ -103,9 +103,9 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.profileDescription}>
                   Fill out your profile to hatch your first egg
                 </Text>
-                <TouchableOpacity style={styles.getStartedButton}>
+                <View style={styles.getStartedButton}>
                   <Text style={styles.getStartedText}>Get Started</Text>
-                </TouchableOpacity>
+                </View>
               </View>
             </View>
           </TouchableOpacity>
@@ -437,7 +437,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     overflow: 'hidden',
-    borderRadius: 12,
   },
   shopBackground: {
     position: 'absolute',
@@ -455,7 +454,7 @@ const styles = StyleSheet.create({
     left: 12,
     right: 12,
     alignItems: 'center',
-    gap: 4,
+    gap: 8,
     flexDirection: 'row'
   },
   coinBubble: {
@@ -463,9 +462,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 20,
-    gap: 18,
+    gap: 12,
   },
   coinIcon: {
     width: 24,
@@ -474,17 +473,17 @@ const styles = StyleSheet.create({
   coinCount: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#225987',
+    color: '#333',
   },
   shopBubble: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   shopLabel: {
     fontSize: 16,
-    color: '#225987',
+    color: '#333',
   },
 
   // Data Card
@@ -502,7 +501,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     overflow: 'hidden',
-    borderRadius: 12,
   },
   dataBackground: {
     position: 'absolute',
@@ -510,6 +508,7 @@ const styles = StyleSheet.create({
     height: '140%',
     top: -30,
     left: -25,
+    borderRadius: 20,
   },
   dataOverlay: {
     position: 'absolute',
@@ -521,9 +520,9 @@ const styles = StyleSheet.create({
   dataChart: {
     position: 'absolute',
     bottom: 40,
-    left: 10,
+    left: 20,
     right: 40,
-    width: '85%',
+    width: '80%',
     height: 180,
   },
   dataHeader: {
@@ -538,9 +537,9 @@ const styles = StyleSheet.create({
   },
   dataTitle: {
     position: 'absolute',
-    top: 15,
+    top: 12,
     fontFamily: 'Sigmar',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#F2DAB3',
     textShadowColor: '#75383B',
@@ -553,7 +552,7 @@ const styles = StyleSheet.create({
     right: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   exploreText: {
@@ -579,24 +578,24 @@ const styles = StyleSheet.create({
     color: '#5D4037',
   },
 
-  // Add Button Gradient Glow (PNG - behind button)
+  // Add Button Gradient
   addButtonGradient: {
     position: 'absolute',
-    bottom: -25, // Adjust to center behind button
-    right: -40, // Adjust to center behind button
-    width: 200, // Size of gradient glow
-    height: 200,
-    zIndex: 0, // Behind the button
+    bottom: 30,
+    right: 14,
+    width: 90,
+    height: 90,
+    zIndex: 0,
   },
 
-  // Floating Add Button (on top)
+  // Floating Add Button
   addButton: {
     position: 'absolute',
     bottom: 40,
     right: 24,
     width: 70,
     height: 70,
-    zIndex: 1, // On top of gradient
+    zIndex: 1,
   },
   addButtonImage: {
     width: 70,

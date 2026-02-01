@@ -11,6 +11,7 @@ import CreatePasswordScreen from './src/screens/CreatePasswordScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import ProfileCompletionScreen from './src/screens/ProfileCompletionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,7 +36,10 @@ function AppNavigator() {
       ) : !hasCompletedOnboarding ? (
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
+        </>
       )}
     </Stack.Navigator>
   );
@@ -55,7 +59,7 @@ export default function App() {
   }, []);
 
   if (!fontsLoaded) {
-    return null; // Or a loading screen
+    return null;
   }
 
   return (
