@@ -13,11 +13,13 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Image,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const MODAL_HEIGHT = SCREEN_HEIGHT * 0.8;
 
 const RECENT_ACTIVITIES = [
   'Date', 'Meeting', 'Scrolling', 'Working',
@@ -26,7 +28,15 @@ const RECENT_ACTIVITIES = [
   'Morning Routine', 'TV', 'Bedtime Routine',
 ];
 
-export default function AddActivityModal({ visible, onClose, onSave }) {
+export default function AddActivityModal({ 
+  visible, 
+  onClose, 
+  onSave,
+  onRemove,
+  initialActivity = '',
+  initialHappiness = 50,
+  isEditing = false
+}) {
   const [activity, setActivity] = useState('');
   const [happiness, setHappiness] = useState(50);
   const [showSlider, setShowSlider] = useState(false);
@@ -34,9 +44,17 @@ export default function AddActivityModal({ visible, onClose, onSave }) {
 
   useEffect(() => {
     if (visible) {
-      setShowSlider(false);
-      setActivity('');
-      setHappiness(50);
+      if (isEditing) {
+        // Pre-fill when editing
+        setActivity(initialActivity);
+        setHappiness(initialHappiness);
+        setShowSlider(true);
+      } else {
+        // Clear when adding new
+        setShowSlider(false);
+        setActivity('');
+        setHappiness(50);
+      }
       // Slide up animation
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -52,7 +70,7 @@ export default function AddActivityModal({ visible, onClose, onSave }) {
         useNativeDriver: true,
       }).start();
     }
-  }, [visible]);
+  }, [visible, isEditing, initialActivity, initialHappiness]);
 
   const handleActivitySelect = (selectedActivity) => {
     setActivity(selectedActivity);
@@ -70,6 +88,12 @@ export default function AddActivityModal({ visible, onClose, onSave }) {
       setActivity('');
       setHappiness(50);
       setShowSlider(false);
+    }
+  };
+
+  const handleRemove = () => {
+    if (onRemove) {
+      onRemove();
     }
   };
 
@@ -100,114 +124,138 @@ export default function AddActivityModal({ visible, onClose, onSave }) {
             },
           ]}
         >
-          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.keyboardView}
-            >
-              {/* Close Button */}
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoidingView}
+            keyboardVerticalOffset={0}
+          >
+            <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+              <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+              >
+                {/* Close Button */}
+                <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </TouchableOpacity>
 
-              {/* Content */}
-              <View style={styles.content}>
-                {/* Title */}
-                <Text style={styles.title}>
-                  {showSlider ? 'What are you up to?' : 'What are you up to?'}
-                </Text>
+                {/* Content */}
+                <View style={styles.content}>
+                  {/* Title */}
+                  <Text style={styles.title}>
+                    {isEditing ? 'Edit Activity' : 'What are you up to?'}
+                  </Text>
 
-                {/* Activity Input */}
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    value={activity}
-                    onChangeText={setActivity}
-                    placeholder="Activity (ie Dinner, Social Media, Sports)"
-                    placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                    onSubmitEditing={handleTextInputSubmit}
-                    returnKeyType="done"
-                  />
-                  {activity.length > 0 && (
-                    <TouchableOpacity
-                      style={styles.clearButton}
-                      onPress={handleClearActivity}
-                    >
-                      <View style={styles.clearButtonCircle}>
-                        <Text style={styles.clearButtonText}>✕</Text>
+                  {/* Activity Input */}
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      value={activity}
+                      onChangeText={setActivity}
+                      placeholder="Activity (ie Dinner, Social Media, Sports)"
+                      placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                      onSubmitEditing={handleTextInputSubmit}
+                      returnKeyType="done"
+                    />
+                    {activity.length > 0 && !isEditing && (
+                      <TouchableOpacity
+                        style={styles.clearButton}
+                        onPress={handleClearActivity}
+                      >
+                        <View style={styles.clearButtonCircle}>
+                          <Text style={styles.clearButtonText}>✕</Text>
+                        </View>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+
+                  {/* Recent Activities - Only show when not editing */}
+                  {!isEditing && (
+                    <>
+                      <Text style={styles.sectionTitle}>RECENT ACTIVITIES</Text>
+                      <View style={styles.activitiesGrid}>
+                        {RECENT_ACTIVITIES.map((item, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.activityChip,
+                              activity === item && styles.activityChipSelected,
+                            ]}
+                            onPress={() => handleActivitySelect(item)}
+                          >
+                            <Text
+                              style={[
+                                styles.activityChipText,
+                                activity === item && styles.activityChipTextSelected,
+                              ]}
+                            >
+                              {item}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
-                    </TouchableOpacity>
+                    </>
+                  )}
+
+                  {/* Happiness Slider */}
+                  {showSlider && (
+                    <View style={styles.sliderContainer}>
+                      <Text style={styles.sliderTitle}>How are you feeling about it?</Text>
+                      <View style={styles.sliderWrapper}>
+                        {/* Sad emoji PNG */}
+                        <Image
+                          source={require('../../assets/emoji/sad.png')}
+                          style={styles.emojiIcon}
+                          resizeMode="contain"
+                        />
+                        <Slider
+                          style={styles.slider}
+                          minimumValue={0}
+                          maximumValue={100}
+                          value={happiness}
+                          onValueChange={setHappiness}
+                          minimumTrackTintColor="#FFFFFF"
+                          maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+                          thumbTintColor="#FFFFFF"
+                        />
+                        {/* Happy emoji PNG */}
+                        <Image
+                          source={require('../../assets/emoji/happy.png')}
+                          style={styles.emojiIcon}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Action Buttons */}
+                  {showSlider && (
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity
+                        style={[styles.saveButton, isEditing && styles.saveButtonEditing]}
+                        onPress={handleSave}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.saveButtonText}>Save</Text>
+                      </TouchableOpacity>
+                      {isEditing && (
+                        <TouchableOpacity
+                          style={styles.removeButton}
+                          onPress={handleRemove}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={styles.removeButtonText}>Remove</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   )}
                 </View>
-
-                {/* Recent Activities */}
-                <Text style={styles.sectionTitle}>RECENT ACTIVITIES</Text>
-                <View style={styles.activitiesGrid}>
-                  {RECENT_ACTIVITIES.map((item, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={[
-                        styles.activityChip,
-                        activity === item && styles.activityChipSelected,
-                      ]}
-                      onPress={() => handleActivitySelect(item)}
-                    >
-                      <Text
-                        style={[
-                          styles.activityChipText,
-                          activity === item && styles.activityChipTextSelected,
-                        ]}
-                      >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {/* Happiness Slider */}
-                {showSlider && (
-                  <View style={styles.sliderContainer}>
-                    <Text style={styles.sliderTitle}>How are you feeling about it?</Text>
-                    <View style={styles.sliderWrapper}>
-                      {/* Sad emoji PNG */}
-                      <Image
-                        source={require('../../assets/emoji/sad.png')}
-                        style={styles.emojiIcon}
-                        resizeMode="contain"
-                      />
-                      <Slider
-                        style={styles.slider}
-                        minimumValue={0}
-                        maximumValue={100}
-                        value={happiness}
-                        onValueChange={setHappiness}
-                        minimumTrackTintColor="#FFFFFF"
-                        maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                        thumbTintColor="#FFFFFF"
-                      />
-                      {/* Happy emoji PNG */}
-                      <Image
-                        source={require('../../assets/emoji/happy.png')}
-                        style={styles.emojiIcon}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  </View>
-                )}
-
-                {/* Save Button */}
-                {showSlider && (
-                  <TouchableOpacity
-                    style={styles.saveButton}
-                    onPress={handleSave}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.saveButtonText}>Save</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </KeyboardAvoidingView>
-          </SafeAreaView>
+              </ScrollView>
+            </SafeAreaView>
+          </KeyboardAvoidingView>
         </Animated.View>
       </View>
     </Modal>
@@ -227,13 +275,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#C9449A',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    maxHeight: SCREEN_HEIGHT * 0.9,
+    height: MODAL_HEIGHT,
+  },
+  keyboardAvoidingView: {
+    height: MODAL_HEIGHT,
   },
   safeArea: {
-    maxHeight: SCREEN_HEIGHT * 0.9,
+    height: MODAL_HEIGHT,
   },
-  keyboardView: {
-    maxHeight: SCREEN_HEIGHT * 0.9,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   closeButton: {
     position: 'absolute',
@@ -347,12 +401,29 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
   },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  removeButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  removeButtonText: {
+    color: '#C9449A',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   saveButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 25,
     paddingVertical: 14,
     paddingHorizontal: 32,
-    alignSelf: 'flex-end',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },

@@ -16,7 +16,6 @@ import AddActivityModal from '../components/AddActivityModal';
 
 const { width } = Dimensions.get('window');
 const CARD_MARGIN = 16;
-const CARD_WIDTH = width - (CARD_MARGIN * 2);
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
@@ -47,7 +46,10 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleDataPress = () => {
-    console.log('Navigate to Data');
+    navigation.navigate('Data', { 
+      activities, 
+      setActivities 
+    });
   };
 
   const handleResourcesPress = () => {
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
 
   // Base Card Style
   card: {
-    width: CARD_WIDTH,
+    width: '100%',
     borderRadius: 20,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -420,6 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
     gap: 16,
+    width: '100%',
   },
 
   // Shop Card
