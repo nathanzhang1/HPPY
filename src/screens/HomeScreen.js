@@ -206,13 +206,34 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Mental Health Resources Card */}
+          {/* Resources Card */}
           <TouchableOpacity 
             style={[styles.card, styles.resourcesCard]}
             onPress={handleResourcesPress}
             activeOpacity={0.9}
           >
-            <Text style={styles.resourcesTitle}>Mental Health Resources</Text>
+            <View style={styles.resourcesBackgroundContainer}>
+              <Image
+                source={require('../../assets/home/resources-background.png')}
+                style={styles.resourcesBackground}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.resourcesOverlay} />
+            
+            <View style={styles.resourcesHeader}>
+              <Image
+                source={require('../../assets/home/wood-plank.png')}
+                style={styles.woodPlankResources}
+                resizeMode="stretch"
+              />
+              <Text style={styles.resourcesTitle}>Resources</Text>
+            </View>
+
+            {/* Research Bubble */}
+            <View style={styles.researchBubble}>
+              <Text style={styles.researchText}>Research</Text>
+            </View>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -302,7 +323,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: '#3D5E4ACC',
-    borderRadius: 20,
+    borderRadius: 10,
   },
   profileContent: {
     flex: 1,
@@ -362,12 +383,12 @@ const styles = StyleSheet.create({
   },
   getStartedButton: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: 20,
   },
   getStartedText: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#177023',
   },
 
@@ -467,7 +488,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    gap: 12,
+    gap: 17,
   },
   coinIcon: {
     width: 24,
@@ -518,7 +539,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: '#1E0329CC',
-    borderRadius: 20,
   },
   dataChart: {
     position: 'absolute',
@@ -540,9 +560,9 @@ const styles = StyleSheet.create({
   },
   dataTitle: {
     position: 'absolute',
-    top: 12,
+    top: 14,
     fontFamily: 'Sigmar',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#F2DAB3',
     textShadowColor: '#75383B',
@@ -552,7 +572,7 @@ const styles = StyleSheet.create({
   exploreBubble: {
     position: 'absolute',
     bottom: 8,
-    right: 16,
+    right: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -565,29 +585,76 @@ const styles = StyleSheet.create({
 
   // Resources Card
   resourcesCard: {
-    height: 62,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F2DAB3',
+    height: 158,
+    marginBottom: 16,
     borderBottomWidth: 8,
     borderTopWidth: 4,
     borderLeftWidth: 4,
     borderRightWidth: 4,
-    borderColor: '#75383B',
+    borderColor: '#25B0AB',
+  },
+  resourcesBackgroundContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  resourcesBackground: {
+    position: 'absolute',
+    width: '110%',
+    height: '110%',
+    top: -10,
+    left: -10,
+  },
+  resourcesOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#25B0AB80',
+    borderRadius: 12,
+  },
+  resourcesHeader: {
+    alignItems: 'center',
+    position: 'relative',
+    bottom: 20,
+  },
+  woodPlankResources: {
+    width: 400,
+    height: 500,
   },
   resourcesTitle: {
-    fontSize: 18,
+    position: 'absolute',
+    top: 33,
+    fontFamily: 'Sigmar',
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#5D4037',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  researchBubble: {
+    position: 'absolute',
+    bottom: 8,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 24,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  researchText: {
+    fontSize: 16,
+    color: '#25B0AB',
   },
 
   // Add Button Gradient
   addButtonGradient: {
     position: 'absolute',
-    bottom: 30,
-    right: 14,
-    width: 90,
-    height: 90,
+    bottom: -20,
+    right: -40,
+    width: 200,
+    height: 200,
     zIndex: 0,
   },
 
