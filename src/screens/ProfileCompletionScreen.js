@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Slider from '@react-native-community/slider';
 import TempProgressBar from '../components/TempProgressBar';
+import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,6 +24,9 @@ export default function ProfileCompletionScreen({ navigation }) {
   const [activities, setActivities] = useState([]);
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [notificationFrequency, setNotificationFrequency] = useState(5);
+  const [isHatching, setIsHatching] = useState(false);
+  const [hasHatched, setHasHatched] = useState(false);
+  const animationRef = useRef(null);
 
   const handleAddActivity = () => {
     if (activityInput.trim() && activities.length < 10) {
@@ -46,7 +50,30 @@ export default function ProfileCompletionScreen({ navigation }) {
     navigation.goBack();
   };
 
+  const handleHatch = () => {
+    setIsHatching(true);
+    // Play animation
+    if (animationRef.current) {
+      animationRef.current.play();
+    }
+  };
+
+  const handleAnimationFinish = () => {
+    setIsHatching(false);
+    setHasHatched(true);
+  };
+
+  const handleGoHome = () => {
+    navigation.goBack();
+  };
+
+  const handleGoSanctuary = () => {
+    // TODO: Navigate to sanctuary when implemented
+    console.log('Navigate to Sanctuary');
+  };
+
   const progress = (selectedActivities.length / 5) * 100;
+  const isProfileComplete = selectedActivities.length === 5;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -72,7 +99,7 @@ export default function ProfileCompletionScreen({ navigation }) {
               <Text style={styles.headerTitle}>Complete Profile</Text>
             </View>
 
-            {/* Content Area with Overlay - Dynamic Height */}
+            {/* Content Area with Overlay - Always visible */}
             <View style={styles.contentWrapper}>
               <View style={styles.contentContainer}>
                 <View style={styles.overlay} />
@@ -81,7 +108,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   {/* Activities Section */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>
-                      Add and select 5 activities that you do regularly
+                      Add 5 activities that you do regularly
                     </Text>
                     
                     <TextInput
@@ -92,6 +119,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                       placeholder="Activity (i.e. Dinner, Scrolling, Sports)"
                       placeholderTextColor="rgba(255, 255, 255, 0.5)"
                       returnKeyType="done"
+                      editable={!hasHatched}
                     />
 
                     {/* Activity Bubbles */}
@@ -108,6 +136,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                               ]}
                               onPress={() => handleToggleActivity(activity)}
                               activeOpacity={0.7}
+                              disabled={hasHatched}
                             >
                               <Text style={[
                                 styles.bubbleText,
@@ -145,6 +174,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                         minimumTrackTintColor="#FFFFFF"
                         maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
                         thumbTintColor="#FFFFFF"
+                        disabled={hasHatched}
                       />
                       
                       <Image
@@ -162,28 +192,88 @@ export default function ProfileCompletionScreen({ navigation }) {
               </View>
             </View>
 
-            {/* Egg and Progress Bar - Outside Overlay */}
+            {/* Egg/Animation/Platypus Section */}
             <View style={styles.bottomSection}>
-              <Image
-                source={require('../../assets/home/egg-icon.png')}
-                style={styles.eggIcon}
-                resizeMode="contain"
-              />
-              <View style={styles.progressBarContainer}>
-                <TempProgressBar progress={progress} width={width - 140} height={20} />
-              </View>
+              {isHatching ? (
+                <LottieView
+                  ref={animationRef}
+                  source={require('../../assets/profile-completion/egg-hatching.json')}
+                  style={styles.hatchingAnimation}
+                  autoPlay
+                  loop={false}
+                  onAnimationFinish={handleAnimationFinish}
+                  resizeMode="contain"
+                />
+              ) : hasHatched ? (
+                <View style={styles.platypusContainer}>
+                  <Image
+                    source={require('../../assets/profile-completion/platypus-glow.png')}
+                    style={styles.platypusGlow}
+                    resizeMode="contain"
+                  />
+                  <Image
+                    source={require('../../assets/profile-completion/platypus.png')}
+                    style={styles.platypusImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              ) : (
+                <>
+                  <Image
+                    source={require('../../assets/home/egg-icon.png')}
+                    style={styles.eggIcon}
+                    resizeMode="contain"
+                  />
+                  <View style={styles.progressBarContainer}>
+                    <TempProgressBar progress={progress} width={width - 140} height={20} />
+                  </View>
+                </>
+              )}
             </View>
 
-            {/* Save Button */}
-            <View style={styles.footer}>
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSave}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+            {/* Message and Buttons Section */}
+            {hasHatched ? (
+              <View style={styles.hatchedFooter}>
+                {/* Message */}
+                <View style={styles.messageContainer}>
+                  <Text style={styles.hatchedMessage}>
+                    Check out your new friend in the Sanctuary!
+                  </Text>
+                </View>
+
+                {/* Buttons */}
+                <View style={styles.hatchedButtons}>
+                  <TouchableOpacity
+                    style={styles.hatchedButton}
+                    onPress={handleGoHome}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.hatchedButtonText}>Home</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.hatchedButton}
+                    onPress={handleGoSanctuary}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.hatchedButtonText}>Sanctuary</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              /* Save/Hatch Button */
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={isProfileComplete ? handleHatch : handleSave}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.saveButtonText}>
+                    {isProfileComplete ? 'Hatch' : 'Save'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </SafeAreaView>
       </View>
@@ -218,15 +308,15 @@ const styles = StyleSheet.create({
   },
   woodPlank: {
     position: 'absolute',
-    width: 400,
+    width: 420,
     height: 900,
     top: -30,
   },
   headerTitle: {
     position: 'absolute',
-    top: 37,
+    top: 35,
     fontFamily: 'Sigmar',
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
     textShadowColor: '#75383B',
@@ -237,6 +327,7 @@ const styles = StyleSheet.create({
   contentWrapper: {
     flex: 1,
     justifyContent: 'center',
+    marginTop: 40,
     paddingHorizontal: 16,
   },
   contentContainer: {
@@ -247,7 +338,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(61, 94, 74, 0.9)',
-    borderRadius: 16,
+    borderRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 5
   },
   content: {
@@ -328,6 +422,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
     paddingBottom: 12,
+    height: 160,
+    justifyContent: 'center',
   },
   eggIcon: {
     width: 115,
@@ -336,6 +432,28 @@ const styles = StyleSheet.create({
   },
   progressBarContainer: {
     alignItems: 'center',
+  },
+  hatchingAnimation: {
+    width: 200,
+    height: 200,
+  },
+  platypusContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: 130,
+    height: 130,
+  },
+  platypusGlow: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    top: 10,
+  },
+  platypusImage: {
+    width: 120,
+    height: 120,
+    zIndex: 1,
   },
   footer: {
     paddingHorizontal: 24,
@@ -355,6 +473,51 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 15,
+    fontWeight: '600',
+    color: '#3D5E4A',
+  },
+  // Hatched Footer Styles
+  hatchedFooter: {
+    paddingHorizontal: 24,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 24,
+    alignItems: 'center',
+  },
+  messageContainer: {
+    backgroundColor: 'rgba(61, 94, 74, 0.95)',
+    borderRadius: 12,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  hatchedMessage: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  hatchedButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  hatchedButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  hatchedButtonText: {
+    fontSize: 15,
+    fontWeight: '400',
     color: '#3D5E4A',
   },
 });
