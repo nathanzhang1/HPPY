@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity, 
-  Image, 
   ScrollView,
-  Dimensions,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
-import TempProgressBar from '../components/TempProgressBar';
 import AddActivityModal from '../components/AddActivityModal';
+import ProfileCard from '../components/home/ProfileCard';
+import SanctuaryCard from '../components/home/SanctuaryCard';
+import ShopCard from '../components/home/ShopCard';
+import DataCard from '../components/home/DataCard';
+import ResourcesCard from '../components/home/ResourcesCard';
 
-const { width } = Dimensions.get('window');
 const CARD_MARGIN = 16;
 
 export default function HomeScreen({ navigation }) {
@@ -66,175 +67,15 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Profile Card */}
-          <TouchableOpacity 
-            style={[styles.card, styles.profileCard]}
-            onPress={handleProfilePress}
-            activeOpacity={0.9}
-          >
-            <View style={styles.profileBackgroundContainer}>
-              <Image
-                source={require('../../assets/home/profile-background.png')}
-                style={styles.profileBackground}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={styles.profileOverlay} />
-            
-            <View style={styles.profileContent}>
-              {/* Left side: Egg and Progress */}
-              <View style={styles.profileLeft}>
-                <Image
-                  source={require('../../assets/home/egg-icon.png')}
-                  style={styles.eggIcon}
-                  resizeMode="contain"
-                />
-                <TempProgressBar progress={50} width={120} height={14} />
-              </View>
-
-              {/* Right side: Title and Button */}
-              <View style={styles.profileRight}>
-                <View style={styles.profileTextContainer}>
-                  <Image
-                    source={require('../../assets/home/wood-plank.png')}
-                    style={styles.woodPlankProfile}
-                    resizeMode="stretch"
-                  />
-                  <Text style={styles.profileTitle}>Complete Profile</Text>
-                </View>
-                <Text style={styles.profileDescription}>
-                  Fill out your profile to hatch your first egg
-                </Text>
-                <View style={styles.getStartedButton}>
-                  <Text style={styles.getStartedText}>Get Started</Text>
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-
-          {/* Sanctuary Card */}
-          <TouchableOpacity 
-            style={[styles.card, styles.sanctuaryCard]}
-            onPress={handleSanctuaryPress}
-            activeOpacity={0.9}
-          >
-            <View style={styles.sanctuaryBackgroundContainer}>
-              <Image
-                source={require('../../assets/home/sanctuary-background.png')}
-                style={styles.sanctuaryBackground}
-                resizeMode="cover"
-              />
-            </View>
-            
-            <View style={styles.sanctuaryHeader}>
-              <Image
-                source={require('../../assets/home/wood-plank.png')}
-                style={styles.woodPlankSanctuary}
-                resizeMode="stretch"
-              />
-              <Text style={styles.sanctuaryTitle}>Sanctuary</Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Bottom Row: Shop and Data */}
+          <ProfileCard onPress={handleProfilePress} />
+          <SanctuaryCard onPress={handleSanctuaryPress} />
+          
           <View style={styles.bottomRow}>
-            {/* Shop Card */}
-            <TouchableOpacity 
-              style={[styles.card, styles.shopCard]}
-              onPress={handleShopPress}
-              activeOpacity={0.9}
-            >
-              <View style={styles.shopBackgroundContainer}>
-                <Image
-                  source={require('../../assets/home/shop-background.png')}
-                  style={styles.shopBackground}
-                  resizeMode="cover"
-                />
-              </View>
-              
-              <View style={styles.shopContent}>
-                <View style={styles.shopFooter}>
-                  <View style={styles.coinBubble}>
-                    <Image
-                      source={require('../../assets/home/coin-icon.png')}
-                      style={styles.coinIcon}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.coinCount}>0</Text>
-                  </View>
-                  <View style={styles.shopBubble}>
-                    <Text style={styles.shopLabel}>Shop</Text>
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            {/* Data Card */}
-            <TouchableOpacity 
-              style={[styles.card, styles.dataCard]}
-              onPress={handleDataPress}
-              activeOpacity={0.9}
-            >
-              <View style={styles.dataBackgroundContainer}>
-                <Image
-                  source={require('../../assets/home/data-background.png')}
-                  style={styles.dataBackground}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.dataOverlay} />
-              
-              <Image
-                source={require('../../assets/home/data-chart.png')}
-                style={styles.dataChart}
-                resizeMode="contain"
-              />
-              
-              <View style={styles.dataHeader}>
-                <Image
-                  source={require('../../assets/home/wood-plank.png')}
-                  style={styles.woodPlankData}
-                  resizeMode="stretch"
-                />
-                <Text style={styles.dataTitle}>Data</Text>
-              </View>
-
-              {/* Explore Bubble */}
-              <View style={styles.exploreBubble}>
-                <Text style={styles.exploreText}>Explore</Text>
-              </View>
-            </TouchableOpacity>
+            <ShopCard onPress={handleShopPress} />
+            <DataCard onPress={handleDataPress} />
           </View>
 
-          {/* Resources Card */}
-          <TouchableOpacity 
-            style={[styles.card, styles.resourcesCard]}
-            onPress={handleResourcesPress}
-            activeOpacity={0.9}
-          >
-            <View style={styles.resourcesBackgroundContainer}>
-              <Image
-                source={require('../../assets/home/resources-background.png')}
-                style={styles.resourcesBackground}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={styles.resourcesOverlay} />
-            
-            <View style={styles.resourcesHeader}>
-              <Image
-                source={require('../../assets/home/wood-plank.png')}
-                style={styles.woodPlankResources}
-                resizeMode="stretch"
-              />
-              <Text style={styles.resourcesTitle}>Resources</Text>
-            </View>
-
-            {/* Research Bubble */}
-            <View style={styles.researchBubble}>
-              <Text style={styles.researchText}>Research</Text>
-            </View>
-          </TouchableOpacity>
+          <ResourcesCard onPress={handleResourcesPress} />
         </ScrollView>
       </SafeAreaView>
 
@@ -244,7 +85,6 @@ export default function HomeScreen({ navigation }) {
         resizeMode="contain"
       />
 
-      {/* Floating Add Button */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
@@ -281,163 +121,6 @@ const styles = StyleSheet.create({
     padding: CARD_MARGIN,
     paddingBottom: 100,
   },
-
-  // Base Card Style
-  card: {
-    width: '100%',
-    borderRadius: 20,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-
-  // Profile Card
-  profileCard: {
-    height: 158,
-    marginBottom: 16,
-    borderBottomWidth: 8,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#67D375',
-  },
-  profileBackgroundContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-    borderRadius: 12,
-  },
-  profileBackground: {
-    position: 'absolute',
-    width: '110%',
-    height: '100%',
-    top: 0,
-    right: -10,
-  },
-  profileOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#3D5E4ACC',
-    borderRadius: 10,
-  },
-  profileContent: {
-    flex: 1,
-    flexDirection: 'row',
-    padding: 16,
-  },
-  profileLeft: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  eggIcon: {
-    width: 100,
-    height: 100,
-    marginBottom: 8,
-  },
-  profileRight: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  profileTextContainer: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-    height: 40,
-  },
-  woodPlankProfile: {
-    position: 'absolute',
-    width: 240,
-    height: 500,
-    top: -30,
-    right: -25,
-  },
-  profileTitle: {
-    position: 'absolute',
-    fontFamily: 'Sigmar',
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-    width: 220,
-    bottom: 5,
-    right: -45,
-  },
-  profileDescription: {
-    fontSize: 17,
-    width: 192,
-    color: '#FFFFFF',
-    textAlign: 'left',
-    marginBottom: 10,
-    lineHeight: 20,
-    fontWeight: 500,
-  },
-  getStartedButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 6,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  getStartedText: {
-    fontSize: 16,
-    color: '#177023',
-  },
-
-  // Sanctuary Card
-  sanctuaryCard: {
-    height: 246,
-    marginBottom: 16,
-    borderBottomWidth: 8,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#75383B',
-  },
-  sanctuaryBackgroundContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-    borderRadius: 12,
-  },
-  sanctuaryBackground: {
-    position: 'absolute',
-    width: '110%',
-    height: '120%',
-    top: -45,
-    left: -17,
-  },
-  sanctuaryHeader: {
-    alignItems: 'center',
-    position: 'relative',
-    bottom: 20,
-  },
-  woodPlankSanctuary: {
-    width: 400,
-    height: 500,
-  },
-  sanctuaryTitle: {
-    position: 'absolute',
-    top: 32,
-    fontFamily: 'Sigmar',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-
-  // Bottom Row
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -445,210 +128,6 @@ const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
   },
-
-  // Shop Card
-  shopCard: {
-    flex: 1,
-    height: 278,
-    borderBottomWidth: 8,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#225987',
-  },
-  shopBackgroundContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-  },
-  shopBackground: {
-    position: 'absolute',
-    width: '115%',
-    height: '115%',
-    top: -20,
-    left: -20,
-  },
-  shopContent: {
-    flex: 1,
-  },
-  shopFooter: {
-    position: 'absolute',
-    bottom: 8,
-    left: 12,
-    right: 12,
-    alignItems: 'center',
-    gap: 8,
-    flexDirection: 'row'
-  },
-  coinBubble: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 17,
-  },
-  coinIcon: {
-    width: 24,
-    height: 24,
-  },
-  coinCount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  shopBubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  shopLabel: {
-    fontSize: 16,
-    color: '#333',
-  },
-
-  // Data Card
-  dataCard: {
-    flex: 1,
-    height: 278,
-    borderBottomWidth: 8,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#B33AE4',
-  },
-  dataBackgroundContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-  },
-  dataBackground: {
-    position: 'absolute',
-    width: '140%',
-    height: '140%',
-    top: -30,
-    left: -25,
-    borderRadius: 20,
-  },
-  dataOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#1E0329CC',
-  },
-  dataChart: {
-    position: 'absolute',
-    bottom: 40,
-    left: 20,
-    right: 40,
-    width: '80%',
-    height: 180,
-  },
-  dataHeader: {
-    alignItems: 'center',
-    paddingTop: 16,
-    position: 'relative',
-  },
-  woodPlankData: {
-    width: 170,
-    height: 500,
-    bottom: 35,
-  },
-  dataTitle: {
-    position: 'absolute',
-    top: 14,
-    fontFamily: 'Sigmar',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  exploreBubble: {
-    position: 'absolute',
-    bottom: 8,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  exploreText: {
-    fontSize: 16,
-    color: '#333',
-  },
-
-  // Resources Card
-  resourcesCard: {
-    height: 158,
-    marginBottom: 16,
-    borderBottomWidth: 8,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#25B0AB',
-  },
-  resourcesBackgroundContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-    borderRadius: 12,
-  },
-  resourcesBackground: {
-    position: 'absolute',
-    width: '110%',
-    height: '110%',
-    top: -10,
-    left: -10,
-  },
-  resourcesOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#25B0AB80',
-    borderRadius: 12,
-  },
-  resourcesHeader: {
-    alignItems: 'center',
-    position: 'relative',
-    bottom: 20,
-  },
-  woodPlankResources: {
-    width: 400,
-    height: 500,
-  },
-  resourcesTitle: {
-    position: 'absolute',
-    top: 33,
-    fontFamily: 'Sigmar',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  researchBubble: {
-    position: 'absolute',
-    bottom: 8,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 24,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  researchText: {
-    fontSize: 16,
-    color: '#25B0AB',
-  },
-
-  // Add Button Gradient
   addButtonGradient: {
     position: 'absolute',
     bottom: -20,
@@ -657,8 +136,6 @@ const styles = StyleSheet.create({
     height: 200,
     zIndex: 0,
   },
-
-  // Floating Add Button
   addButton: {
     position: 'absolute',
     bottom: 40,
