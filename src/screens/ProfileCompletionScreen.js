@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   Dimensions,
   Platform,
@@ -13,77 +12,25 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import Slider from '@react-native-community/slider';
 import TempProgressBar from '../components/TempProgressBar';
 import LottieView from 'lottie-react-native';
+import ActivityInput from '../components/profile-completion/ActivityInput';
+import NotificationSlider from '../components/profile-completion/NotificationSlider';
 
 const { width, height } = Dimensions.get('window');
 
-const MAX_LINES = 5;
-
 export default function ProfileCompletionScreen({ navigation }) {
-  const [activityInput, setActivityInput] = useState('');
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [notificationFrequency, setNotificationFrequency] = useState(5);
   const [isHatching, setIsHatching] = useState(false);
   const [hasHatched, setHasHatched] = useState(false);
-  const [containerHeight, setContainerHeight] = useState(0);
-  const [measurementKey, setMeasurementKey] = useState(0);
-  const tempMeasureRef = useRef(null);
   const animationRef = useRef(null);
 
-  const handleBubblesLayout = (event) => {
-    const { height } = event.nativeEvent.layout;
-    setContainerHeight(height);
-  };
-
-  const calculateLines = (height) => {
-    if (height === 0) return 0;
-    // Bubble height + gap
-    const bubbleHeight = 32; // paddingVertical: 8 * 2 + fontSize: 14 + some padding
-    const gap = 8;
-    const lineHeight = bubbleHeight + gap;
-    return Math.ceil(height / lineHeight);
-  };
-
-  const handleAddActivity = () => {
-    if (activityInput.trim()) {
-      const newActivity = activityInput.trim();
-      
-      // Create temp array to measure
-      const tempActivities = [...selectedActivities, newActivity];
-      
-      // Trigger a temporary render to measure
-      setMeasurementKey(prev => prev + 1);
-      
-      // Use setTimeout to allow the layout to measure
-      setTimeout(() => {
-        if (tempMeasureRef.current) {
-          tempMeasureRef.current.measure((x, y, width, height) => {
-            const wouldBeLines = calculateLines(height);
-            
-            if (wouldBeLines <= MAX_LINES) {
-              // Safe to add
-              setSelectedActivities(tempActivities);
-              setActivityInput('');
-              Keyboard.dismiss();
-            } else {
-              // Would exceed max lines - don't add
-              console.log('Cannot add activity: would exceed 4 lines');
-            }
-          });
-        } else {
-          // Fallback: if measurement fails, just add it
-          setSelectedActivities(tempActivities);
-          setActivityInput('');
-          Keyboard.dismiss();
-        }
-      }, 0);
-    }
+  const handleAddActivity = (activity) => {
+    setSelectedActivities([...selectedActivities, activity]);
   };
 
   const handleRemoveActivity = (activity) => {
-    // Remove activity when clicked
     setSelectedActivities(selectedActivities.filter(a => a !== activity));
   };
 
@@ -95,7 +42,6 @@ export default function ProfileCompletionScreen({ navigation }) {
 
   const handleHatch = () => {
     setIsHatching(true);
-    // Play animation
     if (animationRef.current) {
       animationRef.current.play();
     }
@@ -111,11 +57,9 @@ export default function ProfileCompletionScreen({ navigation }) {
   };
 
   const handleGoSanctuary = () => {
-    // TODO: Navigate to sanctuary when implemented
     console.log('Navigate to Sanctuary');
   };
 
-  // Progress based on minimum of 5 activities, but capped at 100%
   const progress = Math.min((selectedActivities.length / 5) * 100, 100);
   const isProfileComplete = selectedActivities.length >= 5;
 
@@ -124,7 +68,6 @@ export default function ProfileCompletionScreen({ navigation }) {
       <View style={styles.container}>
         <StatusBar style="dark" />
         
-        {/* Background Image - Full Screen */}
         <Image
           source={require('../../assets/home/profile-background.png')}
           style={styles.backgroundImage}
@@ -133,7 +76,6 @@ export default function ProfileCompletionScreen({ navigation }) {
 
         <SafeAreaView style={styles.safeArea} edges={['top']}>
           <View style={styles.mainContent}>
-            {/* Header with Wood Plank */}
             <View style={styles.header}>
               <Image
                 source={require('../../assets/home/wood-plank.png')}
@@ -143,116 +85,27 @@ export default function ProfileCompletionScreen({ navigation }) {
               <Text style={styles.headerTitle}>Complete Profile</Text>
             </View>
 
-            {/* Content Area with Overlay - Always visible */}
             <View style={styles.contentWrapper}>
               <View style={styles.contentContainer}>
                 <View style={styles.overlay} />
                 
                 <View style={styles.content}>
-                  {/* Activities Section */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                      Add 5 activities that you do regularly
-                    </Text>
-                    
-                    <TextInput
-                      style={styles.input}
-                      value={activityInput}
-                      onChangeText={setActivityInput}
-                      onSubmitEditing={handleAddActivity}
-                      placeholder="Activity (i.e. Dinner, Scrolling, Sports)"
-                      placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                      returnKeyType="done"
-                      editable={!hasHatched}
-                    />
+                  <ActivityInput
+                    selectedActivities={selectedActivities}
+                    onAddActivity={handleAddActivity}
+                    onRemoveActivity={handleRemoveActivity}
+                    disabled={hasHatched}
+                  />
 
-                    {/* Activity Bubbles */}
-                    {selectedActivities.length > 0 && (
-                      <View 
-                        style={styles.bubblesContainer}
-                        onLayout={handleBubblesLayout}
-                      >
-                        {selectedActivities.map((activity, index) => (
-                          <TouchableOpacity
-                            key={index}
-                            style={styles.bubbleSelected}
-                            onPress={() => handleRemoveActivity(activity)}
-                            activeOpacity={0.7}
-                            disabled={hasHatched}
-                          >
-                            <Text style={styles.bubbleTextSelected}>
-                              {activity}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    )}
-
-                    {/* Hidden measurement container */}
-                    <View 
-                      style={styles.hiddenMeasurement}
-                      key={measurementKey}
-                    >
-                      <View 
-                        ref={tempMeasureRef}
-                        style={styles.bubblesContainer}
-                        collapsable={false}
-                      >
-                        {[...selectedActivities, activityInput.trim()].map((activity, index) => (
-                          activity && (
-                            <View key={index} style={styles.bubbleSelected}>
-                              <Text style={styles.bubbleTextSelected}>
-                                {activity}
-                              </Text>
-                            </View>
-                          )
-                        ))}
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Notification Frequency Section */}
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                      How many notifications do you want per day?
-                    </Text>
-                    
-                    <View style={styles.sliderWrapper}>
-                      <Image
-                        source={require('../../assets/emoji/turtle.png')}
-                        style={styles.icon}
-                        resizeMode="contain"
-                      />
-                      
-                      <Slider
-                        style={styles.slider}
-                        minimumValue={1}
-                        maximumValue={10}
-                        step={1}
-                        value={notificationFrequency}
-                        onValueChange={setNotificationFrequency}
-                        minimumTrackTintColor="#FFFFFF"
-                        maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                        thumbTintColor="#FFFFFF"
-                        disabled={hasHatched}
-                      />
-                      
-                      <Image
-                        source={require('../../assets/emoji/hare.png')}
-                        style={styles.icon}
-                        resizeMode="contain"
-                      />
-                    </View>
-                    
-                    <Text style={styles.sliderHint}>
-                      This translates to {notificationFrequency} check-ins a day
-                    </Text>
-                  </View>
+                  <NotificationSlider
+                    value={notificationFrequency}
+                    onValueChange={setNotificationFrequency}
+                    disabled={hasHatched}
+                  />
                 </View>
               </View>
             </View>
 
-            {/* Egg/Animation/Platypus Section */}
             <View style={styles.bottomSection}>
               {isHatching ? (
                 <LottieView
@@ -291,17 +144,14 @@ export default function ProfileCompletionScreen({ navigation }) {
               )}
             </View>
 
-            {/* Message and Buttons Section */}
             {hasHatched ? (
               <View style={styles.hatchedFooter}>
-                {/* Message */}
                 <View style={styles.messageContainer}>
                   <Text style={styles.hatchedMessage}>
                     Check out your new friend in the Sanctuary!
                   </Text>
                 </View>
 
-                {/* Buttons */}
                 <View style={styles.hatchedButtons}>
                   <TouchableOpacity
                     style={styles.hatchedButton}
@@ -321,7 +171,6 @@ export default function ProfileCompletionScreen({ navigation }) {
                 </View>
               </View>
             ) : !isHatching && (
-              /* Save/Hatch Button - Hide during animation */
               <View style={styles.footer}>
                 <TouchableOpacity
                   style={styles.saveButton}
@@ -408,76 +257,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 20,
   },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 19,
-    fontWeight: '500',
-    color: '#FFFFFF',
-    marginBottom: 12,
-    lineHeight: 25,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  input: {
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  bubblesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  bubbleSelected: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  bubbleTextSelected: {
-    color: '#3D5E4A',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  hiddenMeasurement: {
-    position: 'absolute',
-    opacity: 0,
-    pointerEvents: 'none',
-    width: '100%',
-  },
-  sliderWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  icon: {
-    width: 28,
-    height: 28,
-  },
-  slider: {
-    flex: 1,
-    height: 40,
-  },
-  sliderHint: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
   bottomSection: {
     alignItems: 'center',
     paddingTop: 20,
@@ -536,7 +315,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#3D5E4A',
   },
-  // Hatched Footer Styles
   hatchedFooter: {
     paddingHorizontal: 24,
     paddingBottom: Platform.OS === 'ios' ? 20 : 24,
