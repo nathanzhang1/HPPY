@@ -19,29 +19,72 @@ import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
 
+const MAX_LINES = 5;
+
 export default function ProfileCompletionScreen({ navigation }) {
   const [activityInput, setActivityInput] = useState('');
-  const [activities, setActivities] = useState([]);
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [notificationFrequency, setNotificationFrequency] = useState(5);
   const [isHatching, setIsHatching] = useState(false);
   const [hasHatched, setHasHatched] = useState(false);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [measurementKey, setMeasurementKey] = useState(0);
+  const tempMeasureRef = useRef(null);
   const animationRef = useRef(null);
 
+  const handleBubblesLayout = (event) => {
+    const { height } = event.nativeEvent.layout;
+    setContainerHeight(height);
+  };
+
+  const calculateLines = (height) => {
+    if (height === 0) return 0;
+    // Bubble height + gap
+    const bubbleHeight = 32; // paddingVertical: 8 * 2 + fontSize: 14 + some padding
+    const gap = 8;
+    const lineHeight = bubbleHeight + gap;
+    return Math.ceil(height / lineHeight);
+  };
+
   const handleAddActivity = () => {
-    if (activityInput.trim() && activities.length < 10) {
-      setActivities([...activities, activityInput.trim()]);
-      setActivityInput('');
-      Keyboard.dismiss();
+    if (activityInput.trim()) {
+      const newActivity = activityInput.trim();
+      
+      // Create temp array to measure
+      const tempActivities = [...selectedActivities, newActivity];
+      
+      // Trigger a temporary render to measure
+      setMeasurementKey(prev => prev + 1);
+      
+      // Use setTimeout to allow the layout to measure
+      setTimeout(() => {
+        if (tempMeasureRef.current) {
+          tempMeasureRef.current.measure((x, y, width, height) => {
+            const wouldBeLines = calculateLines(height);
+            
+            if (wouldBeLines <= MAX_LINES) {
+              // Safe to add
+              setSelectedActivities(tempActivities);
+              setActivityInput('');
+              Keyboard.dismiss();
+            } else {
+              // Would exceed max lines - don't add
+              console.log('Cannot add activity: would exceed 4 lines');
+            }
+          });
+        } else {
+          // Fallback: if measurement fails, just add it
+          setSelectedActivities(tempActivities);
+          setActivityInput('');
+          Keyboard.dismiss();
+        }
+      }, 0);
     }
   };
 
-  const handleToggleActivity = (activity) => {
-    if (selectedActivities.includes(activity)) {
-      setSelectedActivities(selectedActivities.filter(a => a !== activity));
-    } else if (selectedActivities.length < 5) {
-      setSelectedActivities([...selectedActivities, activity]);
-    }
+  const handleRemoveActivity = (activity) => {
+    // Remove activity when clicked
+    setSelectedActivities(selectedActivities.filter(a => a !== activity));
   };
 
   const handleSave = () => {
@@ -72,8 +115,9 @@ export default function ProfileCompletionScreen({ navigation }) {
     console.log('Navigate to Sanctuary');
   };
 
-  const progress = (selectedActivities.length / 5) * 100;
-  const isProfileComplete = selectedActivities.length === 5;
+  // Progress based on minimum of 5 activities, but capped at 100%
+  const progress = Math.min((selectedActivities.length / 5) * 100, 100);
+  const isProfileComplete = selectedActivities.length >= 5;
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -123,32 +167,48 @@ export default function ProfileCompletionScreen({ navigation }) {
                     />
 
                     {/* Activity Bubbles */}
-                    {activities.length > 0 && (
-                      <View style={styles.bubblesContainer}>
-                        {activities.map((activity, index) => {
-                          const isSelected = selectedActivities.includes(activity);
-                          return (
-                            <TouchableOpacity
-                              key={index}
-                              style={[
-                                styles.bubble,
-                                isSelected && styles.bubbleSelected
-                              ]}
-                              onPress={() => handleToggleActivity(activity)}
-                              activeOpacity={0.7}
-                              disabled={hasHatched}
-                            >
-                              <Text style={[
-                                styles.bubbleText,
-                                isSelected && styles.bubbleTextSelected
-                              ]}>
-                                {activity}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
+                    {selectedActivities.length > 0 && (
+                      <View 
+                        style={styles.bubblesContainer}
+                        onLayout={handleBubblesLayout}
+                      >
+                        {selectedActivities.map((activity, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={styles.bubbleSelected}
+                            onPress={() => handleRemoveActivity(activity)}
+                            activeOpacity={0.7}
+                            disabled={hasHatched}
+                          >
+                            <Text style={styles.bubbleTextSelected}>
+                              {activity}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
                     )}
+
+                    {/* Hidden measurement container */}
+                    <View 
+                      style={styles.hiddenMeasurement}
+                      key={measurementKey}
+                    >
+                      <View 
+                        ref={tempMeasureRef}
+                        style={styles.bubblesContainer}
+                        collapsable={false}
+                      >
+                        {[...selectedActivities, activityInput.trim()].map((activity, index) => (
+                          activity && (
+                            <View key={index} style={styles.bubbleSelected}>
+                              <Text style={styles.bubbleTextSelected}>
+                                {activity}
+                              </Text>
+                            </View>
+                          )
+                        ))}
+                      </View>
+                    </View>
                   </View>
 
                   {/* Notification Frequency Section */}
@@ -260,8 +320,8 @@ export default function ProfileCompletionScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : (
-              /* Save/Hatch Button */
+            ) : !isHatching && (
+              /* Save/Hatch Button - Hide during animation */
               <View style={styles.footer}>
                 <TouchableOpacity
                   style={styles.saveButton}
@@ -377,24 +437,24 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  bubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  bubbleSelected: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  bubbleSelected: {
-    backgroundColor: '#FFFFFF',
-  },
-  bubbleText: {
-    color: 'rgba(255, 255, 255, 0.7)',
+  bubbleTextSelected: {
+    color: '#3D5E4A',
     fontSize: 14,
     fontWeight: '500',
   },
-  bubbleTextSelected: {
-    color: '#3D5E4A',
+  hiddenMeasurement: {
+    position: 'absolute',
+    opacity: 0,
+    pointerEvents: 'none',
+    width: '100%',
   },
   sliderWrapper: {
     flexDirection: 'row',
