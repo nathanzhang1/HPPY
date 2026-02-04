@@ -18,8 +18,6 @@ import { useAuth } from '../context/AuthContext';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { validatePassword } from '../utils/validation';
 
-const SIMULATED_NETWORK_DELAY = 500;
-
 export default function CreatePasswordScreen({ navigation, route }) {
   const { phone } = route.params;
   const { createAccount } = useAuth();
@@ -28,10 +26,12 @@ export default function CreatePasswordScreen({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     setErrors({});
+    setAuthError('');
 
     const passwordValidation = validatePassword(password);
     const newErrors = {};
@@ -50,14 +50,12 @@ export default function CreatePasswordScreen({ navigation, route }) {
 
     setLoading(true);
 
-    setTimeout(() => {
-      const result = createAccount(phone, password);
-      setLoading(false);
+    const result = await createAccount(phone, password);
+    setLoading(false);
 
-      if (! result.success) {
-        Alert.alert('Account Creation Failed', result.error);
-      }
-    }, SIMULATED_NETWORK_DELAY);
+    if (! result.success) {
+      setAuthError(result.error);
+    }
   };
 
   return (
@@ -78,6 +76,12 @@ export default function CreatePasswordScreen({ navigation, route }) {
               showsVerticalScrollIndicator={false}
             >
               <View style={styles. formContainer}>
+                {authError ? (
+                  <View style={styles.authErrorContainer}>
+                    <Text style={styles.authErrorText}>{authError}</Text>
+                  </View>
+                ) : null}
+
                 <Text style={styles.title}>Create a password</Text>
                 
                 <View style={styles.inputContainer}>
@@ -175,6 +179,23 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingHorizontal: 32,
+  },
+  authErrorContainer: {
+    backgroundColor: 'rgba(255, 59, 48, 0.4)',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 59, 48, 0.6)',
+  },
+  authErrorText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '600',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   title: {
     fontSize: 24,

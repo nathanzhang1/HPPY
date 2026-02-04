@@ -17,7 +17,11 @@ import DataScreen from './src/screens/DataScreen';
 const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
-  const { user, hasCompletedOnboarding } = useAuth();
+  const { user, hasCompletedOnboarding, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null; // Or a splash screen component
+  }
 
   return (
     <Stack.Navigator 

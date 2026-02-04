@@ -11,3 +11,7 @@ npm-debug.*
 *.orig.*
 web-build/
 .DS_Store
+
+# Backend
+backend/.env
+backend/*.db

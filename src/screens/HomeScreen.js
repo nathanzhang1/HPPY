@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { 
   View, 
+  Text,
   StyleSheet, 
   ScrollView,
   Image,
@@ -19,7 +20,7 @@ import ResourcesCard from '../components/home/ResourcesCard';
 const CARD_MARGIN = 16;
 
 export default function HomeScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [activities, setActivities] = useState([]);
 
@@ -57,6 +58,10 @@ export default function HomeScreen({ navigation }) {
     console.log('Navigate to Resources');
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -76,6 +81,14 @@ export default function HomeScreen({ navigation }) {
           </View>
 
           <ResourcesCard onPress={handleResourcesPress} />
+          
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
 
@@ -120,7 +133,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: CARD_MARGIN,
-    paddingBottom: 100,
+    paddingBottom: 120,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -128,6 +141,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     gap: 16,
     width: '100%',
+  },
+  signOutButton: {
+    marginTop: 24,
+    marginBottom: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  signOutText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF3B30',
   },
   addButtonGradient: {
     position: 'absolute',
