@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+    overflow: 'hidden',
   },
   safeArea: {
     flex: 1,
