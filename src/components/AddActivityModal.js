@@ -17,16 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
+import api from '../services/api';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.8;
-
-const RECENT_ACTIVITIES = [
-  'Date', 'Meeting', 'Scrolling', 'Working',
-  'Eating', 'Coffee', 'Shopping', 'Cooking',
-  'Working Out', 'Jogging', 'Reading', 'Texting',
-  'Morning Routine', 'TV', 'Bedtime Routine',
-];
 
 export default function AddActivityModal({ 
   visible, 
@@ -40,10 +34,12 @@ export default function AddActivityModal({
   const [activity, setActivity] = useState('');
   const [happiness, setHappiness] = useState(50);
   const [showSlider, setShowSlider] = useState(false);
+  const [recommendedActivities, setRecommendedActivities] = useState([]);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (visible) {
+      loadRecommendedActivities();
       if (isEditing) {
         // Pre-fill when editing
         setActivity(initialActivity);
@@ -71,6 +67,16 @@ export default function AddActivityModal({
       }).start();
     }
   }, [visible, isEditing, initialActivity, initialHappiness]);
+
+  const loadRecommendedActivities = async () => {
+    try {
+      const data = await api.getRecommendedActivities();
+      setRecommendedActivities(data.activities || []);
+    } catch (error) {
+      console.error('Failed to load recommended activities:', error);
+      setRecommendedActivities([]);
+    }
+  };
 
   const handleActivitySelect = (selectedActivity) => {
     setActivity(selectedActivity);
@@ -172,12 +178,12 @@ export default function AddActivityModal({
                     )}
                   </View>
 
-                  {/* Recent Activities - Only show when not editing */}
-                  {!isEditing && (
+                  {/* Recommended Activities - Only show when not editing */}
+                  {!isEditing && recommendedActivities.length > 0 && (
                     <>
-                      <Text style={styles.sectionTitle}>RECENT ACTIVITIES</Text>
+                      <Text style={styles.sectionTitle}>RECOMMENDED ACTIVITIES</Text>
                       <View style={styles.activitiesGrid}>
-                        {RECENT_ACTIVITIES.map((item, index) => (
+                        {recommendedActivities.map((item, index) => (
                           <TouchableOpacity
                             key={index}
                             style={[

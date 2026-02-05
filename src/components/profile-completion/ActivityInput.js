@@ -57,7 +57,7 @@ export default function ActivityInput({
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>
-        Add 5 activities that you do regularly
+        Add at least 5 activities that you do regularly
       </Text>
       
       <TextInput

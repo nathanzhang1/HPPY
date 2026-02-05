@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import AddActivityModal from '../components/AddActivityModal';
@@ -23,6 +24,28 @@ const CARD_MARGIN = 16;
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
+  const [userSettings, setUserSettings] = useState({ has_hatched: false });
+  const [recommendedActivities, setRecommendedActivities] = useState([]);
+
+  // Reload settings every time screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserSettings();
+    }, [])
+  );
+
+  const loadUserSettings = async () => {
+    try {
+      const [settings, activities] = await Promise.all([
+        api.getUserSettings(),
+        api.getRecommendedActivities(),
+      ]);
+      setUserSettings(settings);
+      setRecommendedActivities(activities.activities || []);
+    } catch (error) {
+      console.error('Failed to load user settings:', error);
+    }
+  };
 
   const handleAddActivity = async (activity, happiness) => {
     try {
@@ -67,7 +90,11 @@ export default function HomeScreen({ navigation }) {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <ProfileCard onPress={handleProfilePress} />
+          <ProfileCard 
+            onPress={handleProfilePress}
+            progress={Math.min((recommendedActivities.length / 5) * 100, 100)}
+            hasHatched={userSettings.has_hatched}
+          />
           <SanctuaryCard onPress={handleSanctuaryPress} />
           
           <View style={styles.bottomRow}>

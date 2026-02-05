@@ -24,11 +24,18 @@ class ApiService {
     
     const headers = {
       'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning page
       ...options.headers,
     };
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    console.log(`API Request: ${options.method || 'GET'} ${API_URL}${endpoint}`);
+    console.log('Headers:', headers);
+    if (options.body) {
+      console.log('Body:', options.body);
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -37,6 +44,7 @@ class ApiService {
     });
 
     const data = await response.json();
+    console.log(`API Response [${response.status}]:`, data);
 
     if (!response.ok) {
       throw new Error(data.error || 'Request failed');
@@ -122,6 +130,29 @@ class ApiService {
   async deleteActivity(id) {
     return await this.request(`/activities/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // User settings endpoints
+  async getUserSettings() {
+    return await this.request('/user/settings');
+  }
+
+  async updateUserSettings(settings) {
+    return await this.request('/user/settings', {
+      method: 'PATCH',
+      body: JSON.stringify(settings),
+    });
+  }
+
+  async getRecommendedActivities() {
+    return await this.request('/user/recommended-activities');
+  }
+
+  async saveRecommendedActivities(activities) {
+    return await this.request('/user/recommended-activities', {
+      method: 'POST',
+      body: JSON.stringify({ activities }),
     });
   }
 }

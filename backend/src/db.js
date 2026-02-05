@@ -12,6 +12,8 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     phone TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
+    notification_frequency TEXT DEFAULT 'daily',
+    has_hatched BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -24,8 +26,18 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS recommended_activities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    activity_name TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(user_id, activity_name)
+  );
+
   CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
   CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at);
+  CREATE INDEX IF NOT EXISTS idx_recommended_activities_user_id ON recommended_activities(user_id);
 `);
 
 module.exports = db;

@@ -2,7 +2,39 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import TempProgressBar from '../TempProgressBar';
 
-export default function ProfileCard({ onPress }) {
+export default function ProfileCard({ onPress, progress = 0, hasHatched = false }) {
+  if (hasHatched) {
+    // Settings mode - mimic Resources card style with reduced height
+    return (
+      <TouchableOpacity 
+        style={styles.settingsCard}
+        onPress={onPress}
+        activeOpacity={0.9}
+      >
+        <View style={styles.backgroundContainer}>
+          <Image
+            source={require('../../../assets/home/profile-background.png')}
+            style={styles.background}
+            resizeMode="cover"
+          />
+        </View>
+        <View style={styles.overlay} />
+        
+        <View style={styles.settingsContent}>
+          <View style={styles.settingsTextContainer}>
+            <Image
+              source={require('../../../assets/home/wood-plank.png')}
+              style={styles.settingsWoodPlank}
+              resizeMode="stretch"
+            />
+            <Text style={styles.settingsTitle}>Settings</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  // Profile completion mode
   return (
     <TouchableOpacity 
       style={styles.card}
@@ -25,7 +57,7 @@ export default function ProfileCard({ onPress }) {
             style={styles.eggIcon}
             resizeMode="contain"
           />
-          <TempProgressBar progress={50} width={120} height={14} />
+          <TempProgressBar progress={progress} width={120} height={14} />
         </View>
 
         <View style={styles.right}>
@@ -53,6 +85,23 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     height: 158,
+    marginBottom: 16,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderBottomWidth: 8,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#67D375',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  settingsCard: {
+    width: '100%',
+    height: 130,
     marginBottom: 16,
     borderRadius: 20,
     overflow: 'hidden',
@@ -153,5 +202,34 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     color: '#177023',
+  },
+  settingsContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  settingsTextContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
+    width: 240,
+  },
+  settingsWoodPlank: {
+    position: 'absolute',
+    width: 400,
+    height: 500,
+    top: -45,
+  },
+  settingsTitle: {
+    position: 'absolute',
+    fontFamily: 'Sigmar',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    top: -12,
   },
 });

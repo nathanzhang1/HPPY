@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import api from '../services/api';
 import TempProgressBar from '../components/TempProgressBar';
 import LottieView from 'lottie-react-native';
 import ActivityInput from '../components/profile-completion/ActivityInput';
@@ -24,7 +25,34 @@ export default function ProfileCompletionScreen({ navigation }) {
   const [notificationFrequency, setNotificationFrequency] = useState(5);
   const [isHatching, setIsHatching] = useState(false);
   const [hasHatched, setHasHatched] = useState(false);
+  const [justHatched, setJustHatched] = useState(false); // Track if egg just hatched in this session
+  const [loading, setLoading] = useState(true);
   const animationRef = useRef(null);
+
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      console.log('Loading user data...');
+      const [settingsData, activitiesData] = await Promise.all([
+        api.getUserSettings(),
+        api.getRecommendedActivities(),
+      ]);
+      console.log('Settings loaded:', settingsData);
+      console.log('Activities loaded:', activitiesData);
+
+      setNotificationFrequency(parseInt(settingsData.notification_frequency) || 5);
+      setHasHatched(settingsData.has_hatched);
+      setSelectedActivities(activitiesData.activities || []);
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+      console.error('Error details:', error.message, error.stack);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddActivity = (activity) => {
     setSelectedActivities([...selectedActivities, activity]);
@@ -34,34 +62,76 @@ export default function ProfileCompletionScreen({ navigation }) {
     setSelectedActivities(selectedActivities.filter(a => a !== activity));
   };
 
-  const handleSave = () => {
-    console.log('Selected activities:', selectedActivities);
-    console.log('Notification frequency:', notificationFrequency);
-    navigation.goBack();
+  const handleSave = async () => {
+    try {
+      console.log('Saving activities:', selectedActivities);
+      console.log('Saving notification frequency:', notificationFrequency);
+      const results = await Promise.all([
+        api.saveRecommendedActivities(selectedActivities),
+        api.updateUserSettings({ 
+          notification_frequency: notificationFrequency.toString() 
+        }),
+      ]);
+      console.log('Save successful:', results);
+      navigation.goBack();
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+      console.error('Error details:', error.message, error.stack);
+    }
   };
 
-  const handleHatch = () => {
+  const handleHatch = async () => {
     setIsHatching(true);
     if (animationRef.current) {
       animationRef.current.play();
+    }
+    // Save that egg has hatched
+    try {
+      await api.updateUserSettings({ has_hatched: true });
+    } catch (error) {
+      console.error('Failed to update hatched status:', error);
     }
   };
 
   const handleAnimationFinish = () => {
     setIsHatching(false);
     setHasHatched(true);
+    setJustHatched(true); // Mark that we just hatched in this session
   };
 
-  const handleGoHome = () => {
+  const handleGoHome = async () => {
+    // Save any changes made after hatching
+    try {
+      await Promise.all([
+        api.saveRecommendedActivities(selectedActivities),
+        api.updateUserSettings({ 
+          notification_frequency: notificationFrequency.toString() 
+        }),
+      ]);
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+    }
     navigation.goBack();
   };
 
-  const handleGoSanctuary = () => {
+  const handleGoSanctuary = async () => {
+    // Save any changes made after hatching
+    try {
+      await Promise.all([
+        api.saveRecommendedActivities(selectedActivities),
+        api.updateUserSettings({ 
+          notification_frequency: notificationFrequency.toString() 
+        }),
+      ]);
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+    }
     console.log('Navigate to Sanctuary');
   };
 
   const progress = Math.min((selectedActivities.length / 5) * 100, 100);
   const isProfileComplete = selectedActivities.length >= 5;
+  const showSettingsMode = hasHatched && !justHatched; // Only show Settings mode when returning to already-hatched profile
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -82,7 +152,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                 style={styles.woodPlank}
                 resizeMode="stretch"
               />
-              <Text style={styles.headerTitle}>Complete Profile</Text>
+              <Text style={styles.headerTitle}>{showSettingsMode ? 'Settings' : 'Complete Profile'}</Text>
             </View>
 
             <View style={styles.contentWrapper}>
@@ -94,64 +164,71 @@ export default function ProfileCompletionScreen({ navigation }) {
                     selectedActivities={selectedActivities}
                     onAddActivity={handleAddActivity}
                     onRemoveActivity={handleRemoveActivity}
-                    disabled={hasHatched}
                   />
 
                   <NotificationSlider
                     value={notificationFrequency}
                     onValueChange={setNotificationFrequency}
-                    disabled={hasHatched}
                   />
                 </View>
               </View>
             </View>
 
-            <View style={styles.bottomSection}>
-              {isHatching ? (
-                <LottieView
-                  ref={animationRef}
-                  source={require('../../assets/profile-completion/egg-hatching.json')}
-                  style={styles.hatchingAnimation}
-                  autoPlay
-                  loop={false}
-                  onAnimationFinish={handleAnimationFinish}
-                  resizeMode="contain"
-                />
-              ) : hasHatched ? (
-                <View style={styles.platypusContainer}>
-                  <Image
-                    source={require('../../assets/profile-completion/platypus-glow.png')}
-                    style={styles.platypusGlow}
+            {!showSettingsMode && (
+              <View style={styles.bottomSection}>
+                {isHatching ? (
+                  <LottieView
+                    ref={animationRef}
+                    source={require('../../assets/profile-completion/egg-hatching.json')}
+                    style={styles.hatchingAnimation}
+                    autoPlay
+                    loop={false}
+                    onAnimationFinish={handleAnimationFinish}
                     resizeMode="contain"
                   />
-                  <Image
-                    source={require('../../assets/profile-completion/platypus.png')}
-                    style={styles.platypusImage}
-                    resizeMode="contain"
-                  />
-                </View>
-              ) : (
-                <>
-                  <Image
-                    source={require('../../assets/home/egg-icon.png')}
-                    style={styles.eggIcon}
-                    resizeMode="contain"
-                  />
-                  <View style={styles.progressBarContainer}>
-                    <TempProgressBar progress={progress} width={width - 140} height={20} />
+                ) : justHatched ? (
+                  <View style={styles.platypusContainer}>
+                    <Image
+                      source={require('../../assets/profile-completion/platypus-glow.png')}
+                      style={styles.platypusGlow}
+                      resizeMode="contain"
+                    />
+                    <Image
+                      source={require('../../assets/profile-completion/platypus.png')}
+                      style={styles.platypusImage}
+                      resizeMode="contain"
+                    />
                   </View>
-                </>
-              )}
-            </View>
+                ) : (
+                  <>
+                    <Image
+                      source={require('../../assets/home/egg-icon.png')}
+                      style={styles.eggIcon}
+                      resizeMode="contain"
+                    />
+                    <View style={styles.progressBarContainer}>
+                      <TempProgressBar progress={progress} width={width - 140} height={20} />
+                    </View>
+                  </>
+                )}
+              </View>
+            )}
 
-            {hasHatched ? (
+            {showSettingsMode ? (
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleSave}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            ) : justHatched ? (
               <View style={styles.hatchedFooter}>
                 <View style={styles.messageContainer}>
-                  <Text style={styles.hatchedMessage}>
-                    Check out your new friend in the Sanctuary!
-                  </Text>
+                  <Text style={styles.hatchedMessage}>Check out your new friend in the Sanctuary!</Text>
                 </View>
-
                 <View style={styles.hatchedButtons}>
                   <TouchableOpacity
                     style={styles.hatchedButton}
@@ -160,7 +237,6 @@ export default function ProfileCompletionScreen({ navigation }) {
                   >
                     <Text style={styles.hatchedButtonText}>Home</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     style={styles.hatchedButton}
                     onPress={handleGoSanctuary}
@@ -170,7 +246,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : !isHatching && (
+            ) : !isHatching ? (
               <View style={styles.footer}>
                 <TouchableOpacity
                   style={styles.saveButton}
@@ -182,7 +258,7 @@ export default function ProfileCompletionScreen({ navigation }) {
                   </Text>
                 </TouchableOpacity>
               </View>
-            )}
+            ) : null}
           </View>
         </SafeAreaView>
       </View>

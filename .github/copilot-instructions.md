@@ -29,14 +29,18 @@ HPPY is a React Native / Expo mobile app with an Express.js backend for user wel
 
 API endpoints:
 ```
-POST /api/auth/register    - Create account (phone, password)
-POST /api/auth/login       - Sign in, returns JWT
-GET  /api/auth/me          - Get current user (requires auth)
-POST /api/activities       - Create activity (requires auth)
-GET  /api/activities       - Get all user's activities (requires auth)
-PATCH /api/activities/:id  - Update activity (requires auth)
-DELETE /api/activities/:id - Delete activity (requires auth)
-GET  /api/health           - Health check
+POST /api/auth/register              - Create account (phone, password)
+POST /api/auth/login                 - Sign in, returns JWT
+GET  /api/auth/me                    - Get current user (requires auth)
+POST /api/activities                 - Create activity (requires auth)
+GET  /api/activities                 - Get all user's activities (requires auth)
+PATCH /api/activities/:id            - Update activity (requires auth)
+DELETE /api/activities/:id           - Delete activity (requires auth)
+GET  /api/user/settings              - Get notification frequency & has_hatched (requires auth)
+PATCH /api/user/settings             - Update settings (requires auth)
+GET  /api/user/recommended-activities - Get user's recommended activities (requires auth)
+POST /api/user/recommended-activities - Save recommended activities list (requires auth)
+GET  /api/health                     - Health check
 ```
 
 ### Frontend Context Providers (wrap entire app in App.js)
