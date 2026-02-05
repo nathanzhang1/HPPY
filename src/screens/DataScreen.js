@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,42 +10,102 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import api from '../services/api';
 import AddActivityModal from '../components/AddActivityModal';
-import WeeklyHappinessChart from '../components/WeeklyHappinessChart';
-import ActivityLog from '../components/ActivityLog';
+import WeeklyHappinessChart from '../components/data/WeeklyHappinessChart';
+import ActivityLog from '../components/data/ActivityLog';
 
 const { width, height } = Dimensions.get('window');
 
-export default function DataScreen({ navigation, route }) {
-  const { activities = [], setActivities } = route.params || {};
+export default function DataScreen({ navigation }) {
+  const [activities, setActivities] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadActivities();
+  }, []);
+
+  const loadActivities = async () => {
+    try {
+      const data = await api.getActivities();
+      setActivities(data.activities);
+    } catch (error) {
+      console.error('Failed to load activities:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleActivityPress = (activity) => {
     setEditingActivity(activity);
     setModalVisible(true);
   };
 
-  const handleSaveEdit = (activityName, happiness) => {
+  const handleSaveEdit = async (activityName, happiness) => {
     if (editingActivity) {
-      const updatedActivities = activities.map(act =>
-        act.id === editingActivity.id
-          ? { ...act, name: activityName, happiness }
-          : act
-      );
-      setActivities(updatedActivities);
+      try {
+        await api.updateActivity(editingActivity.id, activityName, happiness);
+        await loadActivities(); // Refresh activities
+      } catch (error) {
+        console.error('Failed to update activity:', error);
+      }
     }
     setModalVisible(false);
     setEditingActivity(null);
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (editingActivity) {
-      const updatedActivities = activities.filter(act => act.id !== editingActivity.id);
-      setActivities(updatedActivities);
+      try {
+        await api.deleteActivity(editingActivity.id);
+        await loadActivities(); // Refresh activities
+      } catch (error) {
+        console.error('Failed to delete activity:', error);
+      }
     }
     setModalVisible(false);
     setEditingActivity(null);
+  };
+
+  // Calculate weekly happiness data
+  const getWeeklyData = () => {
+    const now = new Date();
+    
+    // Group activities by local date (not UTC)
+    const dayGroups = {};
+    activities.forEach(activity => {
+      const activityDate = new Date(activity.created_at);
+      // Use local date string for grouping (YYYY-MM-DD in local timezone)
+      const year = activityDate.getFullYear();
+      const month = String(activityDate.getMonth() + 1).padStart(2, '0');
+      const day = String(activityDate.getDate()).padStart(2, '0');
+      const dayKey = `${year}-${month}-${day}`;
+      
+      if (!dayGroups[dayKey]) {
+        dayGroups[dayKey] = [];
+      }
+      dayGroups[dayKey].push(activity.happiness);
+    });
+
+    // Calculate daily averages for last 7 days (in local timezone)
+    const weekData = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dayKey = `${year}-${month}-${day}`;
+      
+      const dayActivities = dayGroups[dayKey] || [];
+      const average = dayActivities.length > 0
+        ? dayActivities.reduce((sum, h) => sum + h, 0) / dayActivities.length
+        : 0;
+      weekData.push(Math.round(average));
+    }
+
+    return weekData;
   };
 
   return (
@@ -82,7 +142,7 @@ export default function DataScreen({ navigation, route }) {
             bounces={false}
           >
             {/* Weekly Happiness Chart */}
-            <WeeklyHappinessChart />
+            <WeeklyHappinessChart data={getWeeklyData()} />
 
             {/* Activity Log */}
             <ActivityLog 

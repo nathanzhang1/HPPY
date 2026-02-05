@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import AddActivityModal from '../components/AddActivityModal';
 import ProfileCard from '../components/home/ProfileCard';
 import SanctuaryCard from '../components/home/SanctuaryCard';
@@ -22,17 +23,14 @@ const CARD_MARGIN = 16;
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
-  const [activities, setActivities] = useState([]);
 
-  const handleAddActivity = (activity, happiness) => {
-    const newActivity = {
-      id: Date.now().toString(),
-      name: activity,
-      happiness: happiness,
-      timestamp: new Date(),
-    };
-    setActivities([newActivity, ...activities]);
-    setModalVisible(false);
+  const handleAddActivity = async (activity, happiness) => {
+    try {
+      await api.createActivity(activity, happiness);
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Failed to create activity:', error);
+    }
   };
 
   const handleProfilePress = () => {
@@ -48,10 +46,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleDataPress = () => {
-    navigation.navigate('Data', { 
-      activities, 
-      setActivities 
-    });
+    navigation.navigate('Data');
   };
 
   const handleResourcesPress = () => {

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function ActivityLog({ activities, onActivityPress }) {
   const formatActivityLog = (activity) => {
-    const date = new Date(activity.timestamp);
+    const date = new Date(activity.created_at);
     const timeString = date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',

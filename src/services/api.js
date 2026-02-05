@@ -93,6 +93,37 @@ class ApiService {
       return null;
     }
   }
+
+  // Activity endpoints
+  async createActivity(name, happiness) {
+    // Send local timestamp to backend
+    const created_at = new Date().toISOString();
+    return await this.request('/activities', {
+      method: 'POST',
+      body: JSON.stringify({ name, happiness, created_at }),
+    });
+  }
+
+  async getActivities() {
+    return await this.request('/activities');
+  }
+
+  async updateActivity(id, name, happiness) {
+    const body = {};
+    if (name !== undefined) body.name = name;
+    if (happiness !== undefined) body.happiness = happiness;
+
+    return await this.request(`/activities/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async deleteActivity(id) {
+    return await this.request(`/activities/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export default new ApiService();

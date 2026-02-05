@@ -1,12 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 
-const DAYS = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
-// Static heights for now (0-100 scale)
-const HEIGHTS = [85, 45, 70, 60, 50, 75, 95];
+const DAY_NAMES = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
 
-export default function WeeklyHappinessChart() {
+export default function WeeklyHappinessChart({ data = [] }) {
   const maxHeight = 150; // Maximum bar height in pixels to fit within axes
+  
+  // Use provided data or fallback to zeros
+  const heights = data.length === 7 ? data : [0, 0, 0, 0, 0, 0, 0];
+  
+  // Generate day labels with today on the right
+  const generateDayLabels = () => {
+    const today = new Date();
+    const todayDayIndex = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const labels = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const dayIndex = (todayDayIndex - i + 7) % 7;
+      labels.push(DAY_NAMES[dayIndex]);
+    }
+    
+    return labels;
+  };
+  
+  const dayLabels = generateDayLabels();
   
   return (
     <View style={styles.container}>
@@ -16,13 +33,13 @@ export default function WeeklyHappinessChart() {
         {/* Y-axis icons */}
         <View style={styles.yAxis}>
           <Image
-            source={require('../../assets/emoji/happy.png')}
+            source={require('../../../assets/emoji/happy.png')}
             style={styles.axisIcon}
             resizeMode="contain"
           />
           <View style={styles.yAxisSpacer} />
           <Image
-            source={require('../../assets/emoji/sad.png')}
+            source={require('../../../assets/emoji/sad.png')}
             style={styles.axisIcon}
             resizeMode="contain"
           />
@@ -41,7 +58,7 @@ export default function WeeklyHappinessChart() {
           {/* Bars - Inside axes */}
           <View style={styles.barsContainer}>
             <View style={styles.bars}>
-              {HEIGHTS.map((height, index) => (
+              {heights.map((height, index) => (
                 <View key={index} style={styles.barWrapper}>
                   <View style={styles.barContainer}>
                     <View 
@@ -58,7 +75,7 @@ export default function WeeklyHappinessChart() {
 
           {/* Day Labels - Below horizontal axis */}
           <View style={styles.labelsContainer}>
-            {DAYS.map((day, index) => (
+            {dayLabels.map((day, index) => (
               <View key={index} style={styles.labelWrapper}>
                 <Text style={styles.dayLabel}>{day}</Text>
               </View>

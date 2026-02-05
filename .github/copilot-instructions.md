@@ -29,10 +29,14 @@ HPPY is a React Native / Expo mobile app with an Express.js backend for user wel
 
 API endpoints:
 ```
-POST /api/auth/register  - Create account (phone, password)
-POST /api/auth/login     - Sign in, returns JWT
-GET  /api/auth/me        - Get current user (requires auth)
-GET  /api/health         - Health check
+POST /api/auth/register    - Create account (phone, password)
+POST /api/auth/login       - Sign in, returns JWT
+GET  /api/auth/me          - Get current user (requires auth)
+POST /api/activities       - Create activity (requires auth)
+GET  /api/activities       - Get all user's activities (requires auth)
+PATCH /api/activities/:id  - Update activity (requires auth)
+DELETE /api/activities/:id - Delete activity (requires auth)
+GET  /api/health           - Health check
 ```
 
 ### Frontend Context Providers (wrap entire app in App.js)
@@ -43,10 +47,16 @@ GET  /api/health         - Health check
 Centralized API client handling authentication headers and token storage:
 ```javascript
 import api from '../services/api';
+// Auth
 await api.login(phone, password);
 await api.register(phone, password);
 await api.logout();
-await api.checkAuth(); // Validates existing token
+await api.checkAuth();
+// Activities
+await api.createActivity(name, happiness);
+await api.getActivities();
+await api.updateActivity(id, name, happiness);
+await api.deleteActivity(id);
 ```
 
 ### Navigation Flow (conditional in AppNavigator)
