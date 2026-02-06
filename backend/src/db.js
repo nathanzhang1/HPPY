@@ -14,6 +14,8 @@ db.exec(`
     password_hash TEXT NOT NULL,
     notification_frequency TEXT DEFAULT 'daily',
     has_hatched BOOLEAN DEFAULT 0,
+    animals TEXT DEFAULT '[]',
+    items TEXT DEFAULT '[]',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 

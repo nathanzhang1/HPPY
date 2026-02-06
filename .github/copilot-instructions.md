@@ -36,7 +36,7 @@ POST /api/activities                 - Create activity (requires auth)
 GET  /api/activities                 - Get all user's activities (requires auth)
 PATCH /api/activities/:id            - Update activity (requires auth)
 DELETE /api/activities/:id           - Delete activity (requires auth)
-GET  /api/user/settings              - Get notification frequency & has_hatched (requires auth)
+GET  /api/user/settings              - Get settings (notification_frequency, has_hatched, animals, items)
 PATCH /api/user/settings             - Update settings (requires auth)
 GET  /api/user/recommended-activities - Get user's recommended activities (requires auth)
 POST /api/user/recommended-activities - Save recommended activities list (requires auth)
@@ -67,14 +67,16 @@ await api.deleteActivity(id);
 ```
 Unauthenticated: Welcome → PhoneEntry → CreatePassword → SignIn
 New User:        → Onboarding
-Authenticated:   Home → ProfileCompletion, Data
+Authenticated:   Home → ProfileCompletion, Data, Sanctuary, FittingRoom
 ```
 
 ### Key Directories
-- `src/screens/` - Full-page screen components
+- `src/screens/` - Full-page screen components (Home, Data, Sanctuary, FittingRoom, ProfileCompletion, etc.)
 - `src/components/` - Reusable UI components
 - `src/components/home/` - Card components for HomeScreen grid layout
+- `src/components/data/` - Data screen components (ActivityLog, WeeklyHappinessChart)
 - `src/utils/validation.js` - Form validation functions (email, password, phone)
+- `assets/fitting-room/` - Fitting room screen assets
 
 ## Conventions
 

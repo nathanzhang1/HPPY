@@ -13,7 +13,7 @@ router.get('/settings', (req, res) => {
     const userId = req.user.userId;
 
     const user = db.prepare(
-      'SELECT notification_frequency, has_hatched FROM users WHERE id = ?'
+      'SELECT notification_frequency, has_hatched, animals, items FROM users WHERE id = ?'
     ).get(userId);
 
     if (!user) {
@@ -22,7 +22,9 @@ router.get('/settings', (req, res) => {
 
     res.json({ 
       notification_frequency: user.notification_frequency,
-      has_hatched: Boolean(user.has_hatched)
+      has_hatched: Boolean(user.has_hatched),
+      animals: JSON.parse(user.animals || '[]'),
+      items: JSON.parse(user.items || '[]')
     });
   } catch (err) {
     console.error('Get settings error:', err);
@@ -34,7 +36,7 @@ router.get('/settings', (req, res) => {
 router.patch('/settings', (req, res) => {
   try {
     const userId = req.user.userId;
-    const { notification_frequency, has_hatched } = req.body;
+    const { notification_frequency, has_hatched, animals, items } = req.body;
 
     const updates = [];
     const values = [];
@@ -46,6 +48,14 @@ router.patch('/settings', (req, res) => {
     if (has_hatched !== undefined) {
       updates.push('has_hatched = ?');
       values.push(has_hatched ? 1 : 0);
+    }
+    if (animals !== undefined) {
+      updates.push('animals = ?');
+      values.push(JSON.stringify(animals));
+    }
+    if (items !== undefined) {
+      updates.push('items = ?');
+      values.push(JSON.stringify(items));
     }
 
     if (updates.length === 0) {
@@ -59,12 +69,14 @@ router.patch('/settings', (req, res) => {
     ).run(...values);
 
     const updatedUser = db.prepare(
-      'SELECT notification_frequency, has_hatched FROM users WHERE id = ?'
+      'SELECT notification_frequency, has_hatched, animals, items FROM users WHERE id = ?'
     ).get(userId);
 
     res.json({ 
       notification_frequency: updatedUser.notification_frequency,
-      has_hatched: Boolean(updatedUser.has_hatched)
+      has_hatched: Boolean(updatedUser.has_hatched),
+      animals: JSON.parse(updatedUser.animals || '[]'),
+      items: JSON.parse(updatedUser.items || '[]')
     });
   } catch (err) {
     console.error('Update settings error:', err);

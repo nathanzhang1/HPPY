@@ -126,7 +126,7 @@ export default function ProfileCompletionScreen({ navigation }) {
     } catch (error) {
       console.error('Failed to save user data:', error);
     }
-    console.log('Navigate to Sanctuary');
+    navigation.navigate('Sanctuary');
   };
 
   const progress = Math.min((selectedActivities.length / 5) * 100, 100);

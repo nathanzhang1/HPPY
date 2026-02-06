@@ -1,16 +1,33 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-export default function TempProgressBar({ progress = 0, width = 120, height = 14 }) {
+export default function TempProgressBar({ 
+  progress = 0, 
+  width = 120, 
+  height = 14,
+  borderColor = '#177023',
+  backgroundColor = '#D6D9DE',
+  progressColor = '#67D375',
+  showBorder = true
+}) {
   const borderRadius = height / 2;
   const progressWidth = Math.max(0, Math.min(100, progress)) * width / 100;
   
   return (
-    <View style={[styles.container, { width, height, borderRadius }]}>
-      {/* Gray background */}
-      <View style={[styles.backgroundBar, { borderRadius }]} />
+    <View style={[
+      styles.container, 
+      { 
+        width, 
+        height, 
+        borderRadius,
+        borderWidth: showBorder ? 2 : 0,
+        borderColor: borderColor,
+      }
+    ]}>
+      {/* Background */}
+      <View style={[styles.backgroundBar, { borderRadius, backgroundColor }]} />
 
-      {/* Solid green progress fill */}
+      {/* Progress fill */}
       {progress > 0 && (
         <View 
           style={[
@@ -18,6 +35,7 @@ export default function TempProgressBar({ progress = 0, width = 120, height = 14
             { 
               width: progressWidth,
               borderRadius,
+              backgroundColor: progressColor,
             }
           ]}
         />
@@ -31,19 +49,15 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: 'transparent',
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#177023',
   },
   backgroundBar: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#D6D9DE',
   },
   progressFill: {
     position: 'absolute',
     top: 0,
     left: 0,
     height: '100%',
-    backgroundColor: '#67D375',
   },
 });

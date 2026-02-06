@@ -61,7 +61,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleSanctuaryPress = () => {
-    console.log('Navigate to Sanctuary');
+    navigation.navigate('Sanctuary');
   };
 
   const handleShopPress = () => {

@@ -13,6 +13,8 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileCompletionScreen from './src/screens/ProfileCompletionScreen';
 import DataScreen from './src/screens/DataScreen';
+import SanctuaryScreen from './src/screens/SanctuaryScreen';
+import FittingRoomScreen from './src/screens/FittingRoomScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +47,8 @@ function AppNavigator() {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="ProfileCompletion" component={ProfileCompletionScreen} />
           <Stack.Screen name="Data" component={DataScreen} />
+          <Stack.Screen name="Sanctuary" component={SanctuaryScreen} />
+          <Stack.Screen name="FittingRoom" component={FittingRoomScreen} />
         </>
       )}
     </Stack.Navigator>
