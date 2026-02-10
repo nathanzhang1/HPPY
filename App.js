@@ -15,6 +15,7 @@ import ProfileCompletionScreen from './src/screens/ProfileCompletionScreen';
 import DataScreen from './src/screens/DataScreen';
 import SanctuaryScreen from './src/screens/SanctuaryScreen';
 import FittingRoomScreen from './src/screens/FittingRoomScreen';
+import ShopScreen from './src/screens/ShopScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +50,7 @@ function AppNavigator() {
           <Stack.Screen name="Data" component={DataScreen} />
           <Stack.Screen name="Sanctuary" component={SanctuaryScreen} />
           <Stack.Screen name="FittingRoom" component={FittingRoomScreen} />
+          <Stack.Screen name="Shop" component={ShopScreen} />
         </>
       )}
     </Stack.Navigator>

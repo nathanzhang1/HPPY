@@ -1,0 +1,403 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useFocusEffect } from '@react-navigation/native';
+import api from '../services/api';
+
+const { width } = Dimensions.get('window');
+
+// Calculate card dimensions to fit within wood plank width
+const WOOD_PLANK_WIDTH = 390; // Approximate visible width of wood plank
+const GRID_PADDING = 16; // Padding on sides
+const CARD_GAP = 4; // Gap between cards
+const CARDS_PER_ROW = 3;
+const CARD_WIDTH = (WOOD_PLANK_WIDTH - (GRID_PADDING * 2) - (CARD_GAP * (CARDS_PER_ROW - 1))) / CARDS_PER_ROW;
+
+// Mock shop items - will be replaced with actual data later
+const SHOP_ITEMS = [
+  { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95 },
+  { id: 2, name: 'Grass Skirt', price: 50, image: require('../../assets/shop/grass-skirt.png'), scale: 0.9 },
+  { id: 3, name: 'Shirt', price: 50, image: require('../../assets/shop/shirt.png'), scale: 1.0 },
+  { id: 4, name: 'Hat', price: 50, image: require('../../assets/shop/hat.png'), scale: 1.2 },
+  { id: 5, name: 'Necklace', price: 50, image: require('../../assets/shop/necklace.png'), scale: 1.1 },
+  { id: 6, name: 'Snorkel', price: 50, image: require('../../assets/shop/snorkel.png'), scale: 1.0 },
+  { id: 7, name: 'Floatie', price: 50, image: require('../../assets/shop/floatie.png'), scale: 1.5 },
+  { id: 8, name: 'Flippers', price: 50, image: require('../../assets/shop/flippers.png'), scale: 1.2 },
+  { id: 9, name: 'Swimsuit', price: 50, image: require('../../assets/shop/swimsuit.png'), scale: 1.2 },
+];
+
+export default function ShopScreen({ navigation }) {
+  const [coins, setCoins] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadUserData();
+    }, [])
+  );
+
+  const loadUserData = async () => {
+    try {
+      // Load user's coin count from backend
+      // For now, set to 0
+      setCoins(0);
+    } catch (error) {
+      console.error('Failed to load user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHomePress = () => {
+    navigation.navigate('Home');
+  };
+
+  const handleExperimentPress = (experimentName) => {
+    console.log(`Navigate to ${experimentName}`);
+  };
+
+  const handleItemPurchase = (item) => {
+    console.log(`Purchase ${item.name} for ${item.price} coins`);
+    // TODO: Implement purchase logic
+  };
+
+  if (loading) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      <StatusBar style="dark" />
+      
+      {/* Background */}
+      <Image
+        source={require('../../assets/shop/background.png')}
+        style={styles.background}
+        resizeMode="cover"
+      />
+
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Experiments Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Image
+                source={require('../../assets/home/wood-plank.png')}
+                style={styles.headerWoodPlank}
+                resizeMode="stretch"
+              />
+              <Text style={styles.sectionTitle}>Experiments</Text>
+            </View>
+
+            <View style={styles.experimentsRow}>
+              <TouchableOpacity 
+                style={styles.exerciseCard}
+                onPress={() => handleExperimentPress('Daily Exercise')}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={require('../../assets/shop/daily-exercise.png')}
+                  style={styles.experimentImage}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.vacationsCard}
+                onPress={() => handleExperimentPress('Weekend Vacations')}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={require('../../assets/shop/weekend-vacations.png')}
+                  style={styles.experimentImage}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Shop Section */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Image
+                source={require('../../assets/home/wood-plank.png')}
+                style={styles.headerWoodPlank}
+                resizeMode="stretch"
+              />
+              <Text style={styles.sectionTitle}>Shop</Text>
+              
+              <View style={styles.coinDisplay}>
+                <Image
+                  source={require('../../assets/home/coin-icon.png')}
+                  style={styles.coinIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.coinText}>{coins}</Text>
+              </View>
+            </View>
+
+            <View style={styles.shopGrid}>
+              {SHOP_ITEMS.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.shopItemCard}
+                  onPress={() => handleItemPurchase(item)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.itemImageContainer}>
+                    {item.image ? (
+                      <Image
+                        source={item.image}
+                        style={[
+                          styles.itemImage,
+                          { 
+                            transform: [{ scale: item.scale || 1 }]
+                          }
+                        ]}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={styles.placeholderImage}>
+                        <Text style={styles.placeholderText}>{item.name}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.priceContainer}>
+                    <Text style={styles.priceText}>{item.price}</Text>
+                    <Image
+                      source={require('../../assets/home/coin-icon.png')}
+                      style={styles.priceCoinIcon}
+                      resizeMode="contain"
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Home Button */}
+        <View style={styles.footer}>
+          <TouchableOpacity 
+            style={styles.homeButton}
+            onPress={handleHomePress}
+          >
+            <Text style={styles.homeButtonText}>Home</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 20,
+    position: 'relative',
+    height: 60,
+  },
+  headerWoodPlank: {
+    position: 'absolute',
+    width: 440,
+    height: 900,
+    top: -60,
+  },
+  sectionTitle: {
+    position: 'absolute',
+    top: 8,
+    fontFamily: 'Sigmar',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    textShadowColor: '#75383B',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    zIndex: 1,
+  },
+  coinDisplay: {
+    position: 'absolute',
+    right: 40,
+    top: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    zIndex: 2,
+  },
+  coinIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 14,
+  },
+  coinText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#225987',
+  },
+  experimentsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    gap: 12,
+    width: WOOD_PLANK_WIDTH,
+    alignSelf: 'center',
+    marginBottom: -20,
+  },
+  exerciseCard: {
+    width: (WOOD_PLANK_WIDTH - 32 - 12) / 2, // Calculate explicit width for 2 cards
+    aspectRatio: 0.85,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#284275',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  vacationsCard: {
+    width: (WOOD_PLANK_WIDTH - 32 - 12) / 2, // Calculate explicit width for 2 cards
+    aspectRatio: 0.85,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#282B19',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  experimentImage: {
+    width: '100%',
+    height: '100%',
+  },
+  shopGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    maxWidth: WOOD_PLANK_WIDTH,
+    alignSelf: 'center',
+    paddingHorizontal: GRID_PADDING,
+    gap: CARD_GAP,
+  },
+  shopItemCard: {
+    width: CARD_WIDTH,
+    aspectRatio: 0.85,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#75383B',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    padding: 8,
+    justifyContent: 'space-between',
+  },
+  itemImageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderImage: {
+    width: '90%',
+    height: '90%',
+    backgroundColor: '#E0E0E0',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 10,
+    color: '#999',
+    textAlign: 'center',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#F2DAB3',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  priceText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#75383B',
+    marginRight: 4,
+  },
+  priceCoinIcon: {
+    width: 20,
+    height: 20,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+  },
+  homeButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  homeButtonText: {
+    fontSize: 15,
+    fontWeight: '400',
+    color: '#1E0329',
+  },
+});

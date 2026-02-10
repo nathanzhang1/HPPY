@@ -65,7 +65,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleShopPress = () => {
-    console.log('Navigate to Shop');
+    navigation.navigate('Shop');
   };
 
   const handleDataPress = () => {

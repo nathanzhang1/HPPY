@@ -67,16 +67,17 @@ await api.deleteActivity(id);
 ```
 Unauthenticated: Welcome → PhoneEntry → CreatePassword → SignIn
 New User:        → Onboarding
-Authenticated:   Home → ProfileCompletion, Data, Sanctuary, FittingRoom
+Authenticated:   Home → ProfileCompletion, Data, Sanctuary, FittingRoom, Shop
 ```
 
 ### Key Directories
-- `src/screens/` - Full-page screen components (Home, Data, Sanctuary, FittingRoom, ProfileCompletion, etc.)
+- `src/screens/` - Full-page screen components (Home, Data, Sanctuary, FittingRoom, Shop, ProfileCompletion, etc.)
 - `src/components/` - Reusable UI components
 - `src/components/home/` - Card components for HomeScreen grid layout
 - `src/components/data/` - Data screen components (ActivityLog, WeeklyHappinessChart)
 - `src/utils/validation.js` - Form validation functions (email, password, phone)
 - `assets/fitting-room/` - Fitting room screen assets
+- `assets/shop/` - Shop screen assets (experiment cards, item images)
 
 ## Conventions
 

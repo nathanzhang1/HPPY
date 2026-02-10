@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use your machine's local IP for physical device testing, or localhost for simulators
-// const API_URL = 'http://localhost:3000/api';
-const API_URL = 'https://rightable-polymeric-katherina.ngrok-free.dev/api';
+const API_URL = 'http://localhost:3000/api';
+// const API_URL = 'https://rightable-polymeric-katherina.ngrok-free.dev/api';
 
 const TOKEN_KEY = 'auth_token';
 

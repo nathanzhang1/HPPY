@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '400',
     color: '#3D5E4A',
   },
   hatchedFooter: {
