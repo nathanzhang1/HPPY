@@ -151,7 +151,10 @@ router.post('/purchase', (req, res) => {
     const userId = req.user.userId;
     const { itemId, itemName, price } = req.body;
 
+    console.log('Purchase request:', { userId, itemId, itemName, price });
+
     if (!itemId || !itemName || price === undefined) {
+      console.log('Validation failed:', { itemId, itemName, price });
       return res.status(400).json({ error: 'Item ID, name, and price are required' });
     }
 
@@ -167,18 +170,38 @@ router.post('/purchase', (req, res) => {
     const currentCoins = user.coins || 0;
     const currentItems = JSON.parse(user.items || '[]');
 
-    // Check if user already owns this item
-    if (currentItems.some(item => item.id === itemId)) {
-      return res.status(400).json({ error: 'Item already owned' });
-    }
-
     // Check if user has enough coins
     if (currentCoins < price) {
       return res.status(400).json({ error: 'Not enough coins' });
     }
 
-    // Deduct coins and add item
-    const newItems = [...currentItems, { id: itemId, name: itemName, equipped: false }];
+    // Deduct coins and add item (allow duplicates with purchaseTime)
+    const newItem = {
+      id: itemId,
+      name: itemName,
+      equipped: false,
+      animal: null,
+      purchaseTime: Date.now()
+    };
+    let newItems = [...currentItems, newItem];
+
+    // FOR TESTING: Add extra items when hula skirt (id: 2) is bought for the first time
+    // Only add if user has NO hula skirts currently
+    const hulaSkirtCount = currentItems.filter(item => item.id === 2).length;
+    if (itemId === 2 && hulaSkirtCount === 0) {
+      const testItems = [
+        { id: 3, name: 'Shirt', equipped: false, animal: null, purchaseTime: Date.now() + 1 },
+        { id: 4, name: 'Hat', equipped: false, animal: null, purchaseTime: Date.now() + 2 },
+        { id: 5, name: 'Necklace', equipped: false, animal: null, purchaseTime: Date.now() + 3 },
+        { id: 6, name: 'Snorkel', equipped: false, animal: null, purchaseTime: Date.now() + 4 },
+        { id: 7, name: 'Floatie', equipped: false, animal: null, purchaseTime: Date.now() + 5 },
+        { id: 8, name: 'Flippers', equipped: false, animal: null, purchaseTime: Date.now() + 6 },
+        { id: 9, name: 'Swimsuit', equipped: false, animal: null, purchaseTime: Date.now() + 7 },
+      ];
+      newItems = [...newItems, ...testItems];
+      console.log('First hula skirt purchase - added test items (shirt, hat, necklace, snorkel, floatie, flippers, swimsuit)');
+    }
+
     const newCoins = currentCoins - price;
 
     db.prepare(

@@ -41,7 +41,6 @@ const SHOP_ITEMS = [
 export default function ShopScreen({ navigation }) {
   const [coins, setCoins] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [ownedItems, setOwnedItems] = useState([]);
   
   // Modal states
   const [dailyExerciseModal, setDailyExerciseModal] = useState(false);
@@ -59,7 +58,6 @@ export default function ShopScreen({ navigation }) {
     try {
       const settingsData = await api.getUserSettings();
       setCoins(settingsData.coins || 0);
-      setOwnedItems(settingsData.items || []);
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -82,21 +80,21 @@ export default function ShopScreen({ navigation }) {
   const handleItemPress = (item) => {
     if (!item.purchasable) return;
     
-    // Check if already owned
-    if (ownedItems.some(owned => owned.id === item.id)) {
-      return;
-    }
-    
     setSelectedItem(item);
     setItemPurchaseModal(true);
   };
 
   const handlePurchase = async (item) => {
     try {
+      console.log('ShopScreen - Attempting purchase:', item);
       const response = await api.purchaseItem(item.id, item.name, item.price);
+      console.log('ShopScreen - Purchase response:', response);
       setCoins(response.coins);
-      setOwnedItems(response.items);
+      
+      // Reload user data to get updated items
+      await loadUserData();
     } catch (error) {
+      console.error('ShopScreen - Purchase error:', error);
       throw new Error(error.message || 'Purchase failed');
     }
   };
@@ -186,13 +184,12 @@ export default function ShopScreen({ navigation }) {
 
             <View style={styles.shopGrid}>
               {SHOP_ITEMS.map((item) => {
-                const isOwned = ownedItems.some(owned => owned.id === item.id);
                 return (
                   <TouchableOpacity
                     key={item.id}
                     style={styles.shopItemCard}
                     onPress={() => handleItemPress(item)}
-                    activeOpacity={item.purchasable && !isOwned ? 0.8 : 1}
+                    activeOpacity={item.purchasable ? 0.8 : 1}
                   >
                     <View style={styles.itemImageContainer}>
                       {item.image ? (
@@ -209,11 +206,6 @@ export default function ShopScreen({ navigation }) {
                     ) : (
                       <View style={styles.placeholderImage}>
                         <Text style={styles.placeholderText}>{item.name}</Text>
-                      </View>
-                    )}
-                    {isOwned && (
-                      <View style={styles.ownedBadge}>
-                        <Text style={styles.ownedText}>Owned</Text>
                       </View>
                     )}
                   </View>
@@ -425,20 +417,6 @@ const styles = StyleSheet.create({
   itemImage: {
     width: '100%',
     height: '100%',
-  },
-  ownedBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: '#75383B',
-    borderRadius: 8,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-  },
-  ownedText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
   },
   placeholderImage: {
     width: '90%',

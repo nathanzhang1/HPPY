@@ -303,7 +303,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 35,
-    right: -152,
+    right: -202,
+    width: 350,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',

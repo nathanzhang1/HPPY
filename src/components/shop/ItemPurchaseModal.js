@@ -31,13 +31,13 @@ export default function ItemPurchaseModal({
 }) {
   const [selectedAnimal, setSelectedAnimal] = useState(0);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setError('');
-      setSuccess(true);
+      setSuccess(false);
       setSelectedAnimal(0);
     }
   }, [visible]);

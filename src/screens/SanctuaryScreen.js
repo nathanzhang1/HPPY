@@ -20,6 +20,7 @@ export default function SanctuaryScreen({ navigation }) {
   const [hasHatched, setHasHatched] = useState(false);
   const [animals, setAnimals] = useState([]);
   const [recommendedActivities, setRecommendedActivities] = useState([]);
+  const [equippedItemId, setEquippedItemId] = useState(null); // Track equipped item
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -34,15 +35,27 @@ export default function SanctuaryScreen({ navigation }) {
         api.getUserSettings(),
         api.getRecommendedActivities(),
       ]);
-      
+
       setHasHatched(settingsData.has_hatched);
       setAnimals(settingsData.animals || []);
       setRecommendedActivities(activitiesData.activities || []);
+      
+      // Find equipped item for platypus
+      const userItems = settingsData.items || [];
+      const equippedItem = userItems.find(item => item.equipped && item.animal === 'platypus');
+      setEquippedItemId(equippedItem ? equippedItem.id : null);
     } catch (error) {
       console.error('Failed to load sanctuary data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getPlatypusImage = () => {
+    if (equippedItemId === 2) { // Hula skirt
+      return require('../../assets/shop/platypus-hula.png');
+    }
+    return require('../../assets/profile-completion/platypus.png');
   };
 
   const handleFittingRoomPress = () => {
@@ -131,7 +144,7 @@ export default function SanctuaryScreen({ navigation }) {
               activeOpacity={0.8}
             >
               <Image
-                source={require('../../assets/profile-completion/platypus.png')}
+                source={getPlatypusImage()}
                 style={styles.platypusImage}
                 resizeMode="contain"
               />

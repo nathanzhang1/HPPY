@@ -34,8 +34,9 @@ const getItemImage = (itemId) => {
 
 export default function FittingRoomScreen({ navigation }) {
   const [items, setItems] = useState([]);
+  const [selectedAnimal, setSelectedAnimal] = useState('platypus'); // Track current animal
+  const [equippedItemId, setEquippedItemId] = useState(null); // Track equipped item for current animal
   const [loading, setLoading] = useState(true);
-  const [equippedItem, setEquippedItem] = useState(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -47,11 +48,37 @@ export default function FittingRoomScreen({ navigation }) {
     try {
       const settingsData = await api.getUserSettings();
       const userItems = settingsData.items || [];
-      setItems(userItems);
       
-      // Find equipped item
-      const equipped = userItems.find(item => item.equipped);
-      setEquippedItem(equipped || null);
+      console.log('FittingRoom - All user items:', userItems);
+      
+      // Filter out eggs (id: 1) and group by item ID to track quantities
+      const fittingRoomItems = userItems.filter(item => item.id !== 1);
+      
+      console.log('FittingRoom - After filtering eggs:', fittingRoomItems);
+      
+      // Group items by id and count quantities
+      const itemGroups = {};
+      fittingRoomItems.forEach(item => {
+        if (!itemGroups[item.id]) {
+          itemGroups[item.id] = {
+            ...item,
+            quantity: 1,
+            instances: [item]
+          };
+        } else {
+          itemGroups[item.id].quantity += 1;
+          itemGroups[item.id].instances.push(item);
+        }
+      });
+      
+      // Convert back to array for display
+      const groupedItems = Object.values(itemGroups);
+      console.log('FittingRoom - Grouped items:', groupedItems);
+      setItems(groupedItems);
+      
+      // Find equipped item for current animal
+      const equipped = fittingRoomItems.find(item => item.equipped && item.animal === selectedAnimal);
+      setEquippedItemId(equipped ? equipped.id : null);
     } catch (error) {
       console.error('Failed to load items:', error);
     } finally {
@@ -61,24 +88,46 @@ export default function FittingRoomScreen({ navigation }) {
 
   const handleItemEquip = async (item) => {
     try {
-      // Toggle equip status
-      const newEquipStatus = !item.equipped;
+      // Toggle equip status for current animal
+      const isCurrentlyEquipped = equippedItemId === item.id;
+      const newEquipStatus = !isCurrentlyEquipped;
       
-      // Update items: unequip all, then equip selected if toggling on
-      const updatedItems = items.map(i => ({
-        ...i,
-        equipped: i.id === item.id ? newEquipStatus : false
-      }));
+      // Get all user items from backend
+      const settingsData = await api.getUserSettings();
+      const allItems = settingsData.items || [];
+      
+      // Update items: unequip all for this animal, then equip first instance of selected item if toggling on
+      const updatedItems = allItems.map((i, index) => {
+        // Unequip all items for current animal
+        if (i.animal === selectedAnimal) {
+          return { ...i, equipped: false, animal: null };
+        }
+        // Equip first instance of the selected item
+        if (i.id === item.id && newEquipStatus && index === allItems.findIndex(x => x.id === item.id)) {
+          return { ...i, equipped: true, animal: selectedAnimal };
+        }
+        return i;
+      });
       
       // Save to backend
       await api.updateUserSettings({ items: updatedItems });
       
       // Update local state
-      setItems(updatedItems);
-      setEquippedItem(newEquipStatus ? item : null);
+      setEquippedItemId(newEquipStatus ? item.id : null);
+      
+      // Reload items to update display
+      await loadItems();
     } catch (error) {
       console.error('Failed to equip item:', error);
     }
+  };
+
+  // Get the image for the animal (with or without item)
+  const getAnimalImage = () => {
+    if (equippedItemId === 2) { // Hula skirt
+      return require('../../assets/shop/platypus-hula.png');
+    }
+    return require('../../assets/profile-completion/platypus.png');
   };
 
   const handleBackPress = () => {
@@ -113,6 +162,18 @@ export default function FittingRoomScreen({ navigation }) {
           </TextStroke>
         </View>
 
+        {/* Animal Display - Fixed Position */}
+        <View style={styles.animalContainer}>
+          <Image
+            source={getAnimalImage()}
+            style={[
+              styles.animalImage,
+              equippedItemId === 2 && styles.animalImageWithHula
+            ]}
+            resizeMode="contain"
+          />
+        </View>
+
         <ScrollView 
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
@@ -124,59 +185,53 @@ export default function FittingRoomScreen({ navigation }) {
             <View style={styles.itemsCard}>
               <Text style={styles.sectionTitle}>Your Items</Text>
               
-              <View style={styles.itemsInnerSection}>
-                {items.length === 0 ? (
+              {items.length === 0 ? (
+                <View style={styles.itemsInnerSection}>
                   <Text style={styles.emptyText}>
                     Nothing's here! Let's go shopping!
                   </Text>
-                ) : (
-                  <View style={styles.itemsGrid}>
-                    {items.map((item) => (
+                </View>
+              ) : (
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.itemsScrollContent}
+                >
+                  {items.map((item) => {
+                    const isEquipped = equippedItemId === item.id;
+                    return (
                       <TouchableOpacity
                         key={item.id}
-                        style={[
-                          styles.itemCard,
-                          item.equipped && styles.itemCardEquipped
-                        ]}
+                        style={styles.itemCard}
                         onPress={() => handleItemEquip(item)}
                         activeOpacity={0.7}
                       >
-                        {getItemImage(item.id) && (
-                          <Image
-                            source={getItemImage(item.id)}
-                            style={styles.itemImage}
-                            resizeMode="contain"
-                          />
-                        )}
-                        <Text style={styles.itemName}>{item.name}</Text>
-                        {item.equipped && (
-                          <View style={styles.equippedBadge}>
-                            <Text style={styles.equippedText}>Equipped</Text>
-                          </View>
-                        )}
+                        <View style={styles.itemImageContainer}>
+                          {getItemImage(item.id) && (
+                            <Image
+                              source={getItemImage(item.id)}
+                              style={[styles.itemImage, isEquipped && styles.itemImageEquipped]}
+                              resizeMode="contain"
+                            />
+                          )}
+                          {isEquipped && (
+                            <View style={styles.crossOverlay}>
+                              <View style={[styles.crossLine, styles.crossLine1]} />
+                              <View style={[styles.crossLine, styles.crossLine2]} />
+                            </View>
+                          )}
+                          {item.quantity > 1 && (
+                            <View style={styles.quantityBadge}>
+                              <Text style={styles.quantityText}>{item.quantity}</Text>
+                            </View>
+                          )}
+                        </View>
                       </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
+                    );
+                  })}
+                </ScrollView>
+              )}
             </View>
-          </View>
-
-          {/* Platypus Display */}
-          <View style={styles.platypusContainer}>
-            <Image
-              source={require('../../assets/profile-completion/platypus.png')}
-              style={styles.platypusImage}
-              resizeMode="contain"
-            />
-            {/* Show equipped item on platypus */}
-            {equippedItem && (
-              <Image
-                source={getItemImage(equippedItem.id)}
-                style={styles.equippedItemImage}
-                resizeMode="contain"
-              />
-            )}
           </View>
         </ScrollView>
 
@@ -229,13 +284,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 34,
-    right: -115,
+    right: -135,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
     paddingHorizontal: 6,
     zIndex: 1,
+    width: 250,
   },
   itemsSection: {
     marginHorizontal: 20,
@@ -259,7 +315,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     lineHeight: 22,
-    marginBottom: 10,
+    marginBottom: 8,
     color: '#75383B',
   },
   itemsInnerSection: {
@@ -278,66 +334,93 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
   },
-  itemsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    width: '100%',
+  itemsScrollContent: {
+    gap: 12,
+    alignItems: 'center',
+    paddingVertical: 4,
   },
   itemCard: {
+    width: 100,
+    height: 100,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#75383B',
-    padding: 10,
-    width: 90,
-    height: 110,
-    justifyContent: 'space-between',
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  itemCardEquipped: {
-    backgroundColor: '#E8F4E5',
-    borderColor: '#177023',
-  },
-  itemImage: {
-    width: 50,
-    height: 50,
-  },
-  itemName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#75383B',
-    textAlign: 'center',
-  },
-  equippedBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: '#177023',
-    borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-  },
-  equippedText: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    fontWeight: '700',
-  },
-  platypusContainer: {
+  itemImageContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 100,
-    marginBottom: 30,
     position: 'relative',
   },
-  platypusImage: {
-    width: 260,
-    height: 260,
+  itemImage: {
+    width: 85,
+    height: 85,
   },
-  equippedItemImage: {
+  itemImageEquipped: {
+    opacity: 0.5,
+  },
+  crossOverlay: {
     position: 'absolute',
-    bottom: 40,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  crossLine: {
+    position: 'absolute',
     width: 80,
-    height: 80,
+    height: 8,
+    backgroundColor: '#75383B',
+  },
+  crossLine1: {
+    transform: [{ rotate: '45deg' }],
+  },
+  crossLine2: {
+    transform: [{ rotate: '-45deg' }],
+  },
+  quantityBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: '#75383B',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  quantityText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  animalContainer: {
+    position: 'absolute',
+    top: 500,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  animalImage: {
+    width: 270,
+    height: 270,
+  },
+  animalImageWithHula: {
+    // Adjust these values to align platypus-hula with regular platypus
+    width: 337,      // Adjust width if needed
+    height: 337,     // Adjust height if needed
+    // Uncomment and adjust if you need position offset:
+    right: 20,
   },
   footer: {
     position: 'absolute',
