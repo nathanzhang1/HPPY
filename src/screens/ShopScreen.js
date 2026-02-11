@@ -12,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
+import ExperimentModal from '../components/shop/ExperimentModal';
+import ItemPurchaseModal from '../components/shop/ItemPurchaseModal';
 
 const { width } = Dimensions.get('window');
 
@@ -24,20 +26,27 @@ const CARD_WIDTH = (WOOD_PLANK_WIDTH - (GRID_PADDING * 2) - (CARD_GAP * (CARDS_P
 
 // Mock shop items - will be replaced with actual data later
 const SHOP_ITEMS = [
-  { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95 },
-  { id: 2, name: 'Grass Skirt', price: 50, image: require('../../assets/shop/grass-skirt.png'), scale: 0.9 },
-  { id: 3, name: 'Shirt', price: 50, image: require('../../assets/shop/shirt.png'), scale: 1.0 },
-  { id: 4, name: 'Hat', price: 50, image: require('../../assets/shop/hat.png'), scale: 1.2 },
-  { id: 5, name: 'Necklace', price: 50, image: require('../../assets/shop/necklace.png'), scale: 1.1 },
-  { id: 6, name: 'Snorkel', price: 50, image: require('../../assets/shop/snorkel.png'), scale: 1.0 },
-  { id: 7, name: 'Floatie', price: 50, image: require('../../assets/shop/floatie.png'), scale: 1.5 },
-  { id: 8, name: 'Flippers', price: 50, image: require('../../assets/shop/flippers.png'), scale: 1.2 },
-  { id: 9, name: 'Swimsuit', price: 50, image: require('../../assets/shop/swimsuit.png'), scale: 1.2 },
+  { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95, purchasable: false },
+  { id: 2, name: 'Grass Skirt', price: 50, image: require('../../assets/shop/grass-skirt.png'), scale: 0.9, purchasable: true },
+  { id: 3, name: 'Shirt', price: 50, image: require('../../assets/shop/shirt.png'), scale: 1.0, purchasable: false },
+  { id: 4, name: 'Hat', price: 50, image: require('../../assets/shop/hat.png'), scale: 1.2, purchasable: false },
+  { id: 5, name: 'Necklace', price: 50, image: require('../../assets/shop/necklace.png'), scale: 1.1, purchasable: false },
+  { id: 6, name: 'Snorkel', price: 50, image: require('../../assets/shop/snorkel.png'), scale: 1.0, purchasable: false },
+  { id: 7, name: 'Floatie', price: 50, image: require('../../assets/shop/floatie.png'), scale: 1.5, purchasable: false },
+  { id: 8, name: 'Flippers', price: 50, image: require('../../assets/shop/flippers.png'), scale: 1.2, purchasable: false },
+  { id: 9, name: 'Swimsuit', price: 50, image: require('../../assets/shop/swimsuit.png'), scale: 1.2, purchasable: false },
 ];
 
 export default function ShopScreen({ navigation }) {
   const [coins, setCoins] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [ownedItems, setOwnedItems] = useState([]);
+  
+  // Modal states
+  const [dailyExerciseModal, setDailyExerciseModal] = useState(false);
+  const [weekendVacationsModal, setWeekendVacationsModal] = useState(false);
+  const [itemPurchaseModal, setItemPurchaseModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -47,9 +56,9 @@ export default function ShopScreen({ navigation }) {
 
   const loadUserData = async () => {
     try {
-      // Load user's coin count from backend
-      // For now, set to 0
-      setCoins(0);
+      const settingsData = await api.getUserSettings();
+      setCoins(settingsData.coins || 0);
+      setOwnedItems(settingsData.items || []);
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -62,12 +71,33 @@ export default function ShopScreen({ navigation }) {
   };
 
   const handleExperimentPress = (experimentName) => {
-    console.log(`Navigate to ${experimentName}`);
+    if (experimentName === 'Daily Exercise') {
+      setDailyExerciseModal(true);
+    } else if (experimentName === 'Weekend Vacations') {
+      setWeekendVacationsModal(true);
+    }
   };
 
-  const handleItemPurchase = (item) => {
-    console.log(`Purchase ${item.name} for ${item.price} coins`);
-    // TODO: Implement purchase logic
+  const handleItemPress = (item) => {
+    if (!item.purchasable) return;
+    
+    // Check if already owned
+    if (ownedItems.some(owned => owned.id === item.id)) {
+      return;
+    }
+    
+    setSelectedItem(item);
+    setItemPurchaseModal(true);
+  };
+
+  const handlePurchase = async (item) => {
+    try {
+      const response = await api.purchaseItem(item.id, item.name, item.price);
+      setCoins(response.coins);
+      setOwnedItems(response.items);
+    } catch (error) {
+      throw new Error(error.message || 'Purchase failed');
+    }
   };
 
   if (loading) {
@@ -150,19 +180,21 @@ export default function ShopScreen({ navigation }) {
             </View>
 
             <View style={styles.shopGrid}>
-              {SHOP_ITEMS.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.shopItemCard}
-                  onPress={() => handleItemPurchase(item)}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.itemImageContainer}>
-                    {item.image ? (
-                      <Image
-                        source={item.image}
-                        style={[
-                          styles.itemImage,
+              {SHOP_ITEMS.map((item) => {
+                const isOwned = ownedItems.some(owned => owned.id === item.id);
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.shopItemCard}
+                    onPress={() => handleItemPress(item)}
+                    activeOpacity={item.purchasable && !isOwned ? 0.8 : 1}
+                  >
+                    <View style={styles.itemImageContainer}>
+                      {item.image ? (
+                        <Image
+                          source={item.image}
+                          style={[
+                            styles.itemImage,
                           { 
                             transform: [{ scale: item.scale || 1 }]
                           }
@@ -172,6 +204,11 @@ export default function ShopScreen({ navigation }) {
                     ) : (
                       <View style={styles.placeholderImage}>
                         <Text style={styles.placeholderText}>{item.name}</Text>
+                      </View>
+                    )}
+                    {isOwned && (
+                      <View style={styles.ownedBadge}>
+                        <Text style={styles.ownedText}>Owned</Text>
                       </View>
                     )}
                   </View>
@@ -185,7 +222,8 @@ export default function ShopScreen({ navigation }) {
                     />
                   </View>
                 </TouchableOpacity>
-              ))}
+              );
+              })}
             </View>
           </View>
         </ScrollView>
@@ -200,6 +238,30 @@ export default function ShopScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+
+      {/* Modals */}
+      <ExperimentModal
+        visible={dailyExerciseModal}
+        onClose={() => setDailyExerciseModal(false)}
+        type="dailyExercise"
+      />
+      
+      <ExperimentModal
+        visible={weekendVacationsModal}
+        onClose={() => setWeekendVacationsModal(false)}
+        type="weekendVacations"
+      />
+      
+      <ItemPurchaseModal
+        visible={itemPurchaseModal}
+        onClose={() => {
+          setItemPurchaseModal(false);
+          setSelectedItem(null);
+        }}
+        item={selectedItem}
+        userCoins={coins}
+        onPurchase={handlePurchase}
+      />
     </View>
   );
 }
@@ -342,10 +404,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   itemImage: {
     width: '100%',
     height: '100%',
+  },
+  ownedBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#75383B',
+    borderRadius: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  ownedText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '600',
   },
   placeholderImage: {
     width: '90%',

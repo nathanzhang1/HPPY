@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-export default function ShopCard({ onPress }) {
+export default function ShopCard({ onPress, coins = 0 }) {
   return (
     <TouchableOpacity 
       style={styles.card}
@@ -24,7 +24,7 @@ export default function ShopCard({ onPress }) {
               style={styles.coinIcon}
               resizeMode="contain"
             />
-            <Text style={styles.coinCount}>0</Text>
+            <Text style={styles.coinCount}>{coins}</Text>
           </View>
           <View style={styles.shopBubble}>
             <Text style={styles.shopLabel}>Shop</Text>
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    gap: 17,
+    gap: 8,
   },
   coinIcon: {
     width: 24,

@@ -15,9 +15,26 @@ import api from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
+// Helper function to get item image
+const getItemImage = (itemId) => {
+  const itemImages = {
+    1: require('../../assets/home/egg-icon.png'),
+    2: require('../../assets/shop/grass-skirt.png'),
+    3: require('../../assets/shop/shirt.png'),
+    4: require('../../assets/shop/hat.png'),
+    5: require('../../assets/shop/necklace.png'),
+    6: require('../../assets/shop/snorkel.png'),
+    7: require('../../assets/shop/floatie.png'),
+    8: require('../../assets/shop/flippers.png'),
+    9: require('../../assets/shop/swimsuit.png'),
+  };
+  return itemImages[itemId] || null;
+};
+
 export default function FittingRoomScreen({ navigation }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [equippedItem, setEquippedItem] = useState(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -28,11 +45,38 @@ export default function FittingRoomScreen({ navigation }) {
   const loadItems = async () => {
     try {
       const settingsData = await api.getUserSettings();
-      setItems(settingsData.items || []);
+      const userItems = settingsData.items || [];
+      setItems(userItems);
+      
+      // Find equipped item
+      const equipped = userItems.find(item => item.equipped);
+      setEquippedItem(equipped || null);
     } catch (error) {
       console.error('Failed to load items:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleItemEquip = async (item) => {
+    try {
+      // Toggle equip status
+      const newEquipStatus = !item.equipped;
+      
+      // Update items: unequip all, then equip selected if toggling on
+      const updatedItems = items.map(i => ({
+        ...i,
+        equipped: i.id === item.id ? newEquipStatus : false
+      }));
+      
+      // Save to backend
+      await api.updateUserSettings({ items: updatedItems });
+      
+      // Update local state
+      setItems(updatedItems);
+      setEquippedItem(newEquipStatus ? item : null);
+    } catch (error) {
+      console.error('Failed to equip item:', error);
     }
   };
 
@@ -84,10 +128,30 @@ export default function FittingRoomScreen({ navigation }) {
                   </Text>
                 ) : (
                   <View style={styles.itemsGrid}>
-                    {items.map((item, index) => (
-                      <View key={index} style={styles.itemCard}>
+                    {items.map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={[
+                          styles.itemCard,
+                          item.equipped && styles.itemCardEquipped
+                        ]}
+                        onPress={() => handleItemEquip(item)}
+                        activeOpacity={0.7}
+                      >
+                        {getItemImage(item.id) && (
+                          <Image
+                            source={getItemImage(item.id)}
+                            style={styles.itemImage}
+                            resizeMode="contain"
+                          />
+                        )}
                         <Text style={styles.itemName}>{item.name}</Text>
-                      </View>
+                        {item.equipped && (
+                          <View style={styles.equippedBadge}>
+                            <Text style={styles.equippedText}>Equipped</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
                     ))}
                   </View>
                 )}
@@ -102,6 +166,14 @@ export default function FittingRoomScreen({ navigation }) {
               style={styles.platypusImage}
               resizeMode="contain"
             />
+            {/* Show equipped item on platypus */}
+            {equippedItem && (
+              <Image
+                source={getItemImage(equippedItem.id)}
+                style={styles.equippedItemImage}
+                resizeMode="contain"
+              />
+            )}
           </View>
         </ScrollView>
 
@@ -163,15 +235,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 10,
     zIndex: 1,
   },
-  platypusContainer: {
-    alignItems: 'center',
-    marginTop: 100,
-    marginBottom: 30,
-  },
-  platypusImage: {
-    width: 260,
-    height: 260,
-  },
   itemsSection: {
     marginHorizontal: 20,
     marginTop: 80,
@@ -217,19 +280,62 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+    width: '100%',
   },
   itemCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: '#75383B',
-    minWidth: 100,
+    padding: 10,
+    width: 90,
+    height: 110,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  itemCardEquipped: {
+    backgroundColor: '#E8F4E5',
+    borderColor: '#177023',
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
   },
   itemName: {
-    fontSize: 14,
-    color: '#75383B',
+    fontSize: 12,
     fontWeight: '600',
+    color: '#75383B',
+    textAlign: 'center',
+  },
+  equippedBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#177023',
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  equippedText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: '700',
+  },
+  platypusContainer: {
+    alignItems: 'center',
+    marginTop: 100,
+    marginBottom: 30,
+    position: 'relative',
+  },
+  platypusImage: {
+    width: 260,
+    height: 260,
+  },
+  equippedItemImage: {
+    position: 'absolute',
+    bottom: 40,
+    width: 80,
+    height: 80,
   },
   footer: {
     position: 'absolute',

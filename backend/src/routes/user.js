@@ -13,7 +13,7 @@ router.get('/settings', (req, res) => {
     const userId = req.user.userId;
 
     const user = db.prepare(
-      'SELECT notification_frequency, has_hatched, animals, items FROM users WHERE id = ?'
+      'SELECT notification_frequency, has_hatched, animals, items, coins FROM users WHERE id = ?'
     ).get(userId);
 
     if (!user) {
@@ -24,7 +24,8 @@ router.get('/settings', (req, res) => {
       notification_frequency: user.notification_frequency,
       has_hatched: Boolean(user.has_hatched),
       animals: JSON.parse(user.animals || '[]'),
-      items: JSON.parse(user.items || '[]')
+      items: JSON.parse(user.items || '[]'),
+      coins: user.coins || 0
     });
   } catch (err) {
     console.error('Get settings error:', err);
@@ -69,14 +70,15 @@ router.patch('/settings', (req, res) => {
     ).run(...values);
 
     const updatedUser = db.prepare(
-      'SELECT notification_frequency, has_hatched, animals, items FROM users WHERE id = ?'
+      'SELECT notification_frequency, has_hatched, animals, items, coins FROM users WHERE id = ?'
     ).get(userId);
 
     res.json({ 
       notification_frequency: updatedUser.notification_frequency,
       has_hatched: Boolean(updatedUser.has_hatched),
       animals: JSON.parse(updatedUser.animals || '[]'),
-      items: JSON.parse(updatedUser.items || '[]')
+      items: JSON.parse(updatedUser.items || '[]'),
+      coins: updatedUser.coins || 0
     });
   } catch (err) {
     console.error('Update settings error:', err);
@@ -139,6 +141,57 @@ router.post('/recommended-activities', (req, res) => {
     });
   } catch (err) {
     console.error('Save recommended activities error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Purchase item
+router.post('/purchase', (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { itemId, itemName, price } = req.body;
+
+    if (!itemId || !itemName || price === undefined) {
+      return res.status(400).json({ error: 'Item ID, name, and price are required' });
+    }
+
+    // Get user's current coins and items
+    const user = db.prepare(
+      'SELECT coins, items FROM users WHERE id = ?'
+    ).get(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentCoins = user.coins || 0;
+    const currentItems = JSON.parse(user.items || '[]');
+
+    // Check if user already owns this item
+    if (currentItems.some(item => item.id === itemId)) {
+      return res.status(400).json({ error: 'Item already owned' });
+    }
+
+    // Check if user has enough coins
+    if (currentCoins < price) {
+      return res.status(400).json({ error: 'Not enough coins' });
+    }
+
+    // Deduct coins and add item
+    const newItems = [...currentItems, { id: itemId, name: itemName, equipped: false }];
+    const newCoins = currentCoins - price;
+
+    db.prepare(
+      'UPDATE users SET coins = ?, items = ? WHERE id = ?'
+    ).run(newCoins, JSON.stringify(newItems), userId);
+
+    res.json({ 
+      coins: newCoins,
+      items: newItems,
+      message: 'Purchase successful'
+    });
+  } catch (err) {
+    console.error('Purchase error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

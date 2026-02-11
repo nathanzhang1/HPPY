@@ -16,6 +16,7 @@ db.exec(`
     has_hatched BOOLEAN DEFAULT 0,
     animals TEXT DEFAULT '[]',
     items TEXT DEFAULT '[]',
+    coins INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 

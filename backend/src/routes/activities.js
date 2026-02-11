@@ -28,11 +28,23 @@ router.post('/', (req, res) => {
       'INSERT INTO activities (user_id, name, happiness, created_at) VALUES (?, ?, ?, ?)'
     ).run(userId, name, happiness, timestamp);
 
+    // Award 10 coins for logging activity
+    db.prepare(
+      'UPDATE users SET coins = coins + 10 WHERE id = ?'
+    ).run(userId);
+
     const activity = db.prepare(
       'SELECT * FROM activities WHERE id = ?'
     ).get(result.lastInsertRowid);
 
-    res.status(201).json({ activity });
+    const user = db.prepare(
+      'SELECT coins FROM users WHERE id = ?'
+    ).get(userId);
+
+    res.status(201).json({ 
+      activity,
+      coins: user.coins
+    });
   } catch (err) {
     console.error('Create activity error:', err);
     res.status(500).json({ error: 'Internal server error' });

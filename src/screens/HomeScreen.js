@@ -24,7 +24,7 @@ const CARD_MARGIN = 16;
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
-  const [userSettings, setUserSettings] = useState({ has_hatched: false });
+  const [userSettings, setUserSettings] = useState({ has_hatched: false, coins: 0 });
   const [recommendedActivities, setRecommendedActivities] = useState([]);
 
   // Reload settings every time screen comes into focus
@@ -49,8 +49,12 @@ export default function HomeScreen({ navigation }) {
 
   const handleAddActivity = async (activity, happiness) => {
     try {
-      await api.createActivity(activity, happiness);
+      const response = await api.createActivity(activity, happiness);
       setModalVisible(false);
+      // Update coins if returned
+      if (response.coins !== undefined) {
+        setUserSettings(prev => ({ ...prev, coins: response.coins }));
+      }
     } catch (error) {
       console.error('Failed to create activity:', error);
     }
@@ -98,7 +102,7 @@ export default function HomeScreen({ navigation }) {
           <SanctuaryCard onPress={handleSanctuaryPress} />
           
           <View style={styles.bottomRow}>
-            <ShopCard onPress={handleShopPress} />
+            <ShopCard onPress={handleShopPress} coins={userSettings.coins || 0} />
             <DataCard onPress={handleDataPress} />
           </View>
 
