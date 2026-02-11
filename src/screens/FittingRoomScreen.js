@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
+import TextStroke from '../components/TextStroke';
 
 const { width, height } = Dimensions.get('window');
 
@@ -107,7 +108,9 @@ export default function FittingRoomScreen({ navigation }) {
             style={styles.woodPlank}
             resizeMode="stretch"
           />
-          <Text style={styles.headerTitle}>Fitting Room</Text>
+          <TextStroke stroke={3} color="#75383B">
+            <Text style={styles.headerTitle}>Fitting Room</Text>
+          </TextStroke>
         </View>
 
         <ScrollView 
@@ -226,13 +229,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 34,
+    right: -115,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 6,
     zIndex: 1,
   },
   itemsSection: {

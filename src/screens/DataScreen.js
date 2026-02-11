@@ -14,6 +14,7 @@ import api from '../services/api';
 import AddActivityModal from '../components/AddActivityModal';
 import WeeklyHappinessChart from '../components/data/WeeklyHappinessChart';
 import ActivityLog from '../components/data/ActivityLog';
+import TextStroke from '../components/TextStroke';
 
 const { width, height } = Dimensions.get('window');
 
@@ -129,7 +130,9 @@ export default function DataScreen({ navigation }) {
             style={styles.woodPlank}
             resizeMode="stretch"
           />
-          <Text style={styles.headerTitle}>Data</Text>
+          <TextStroke stroke={3} color="#75383B">
+            <Text style={styles.headerTitle}>Data</Text>
+          </TextStroke>
         </View>
 
         {/* Content Area with Overlay - Scrollable */}
@@ -216,13 +219,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 34,
+    right: -50,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 6,
     zIndex: 1,
   },
   contentWrapper: {

@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import TempProgressBar from '../components/TempProgressBar';
+import TextStroke from '../components/TextStroke';
 
 const { width, height } = Dimensions.get('window');
 
@@ -76,7 +77,9 @@ export default function SanctuaryScreen({ navigation }) {
             style={styles.woodPlank}
             resizeMode="stretch"
           />
-          <Text style={styles.headerTitle}>Sanctuary</Text>
+          <TextStroke stroke={3} color="#75383B">
+            <Text style={styles.headerTitle}>Sanctuary</Text>
+          </TextStroke>
         </View>
 
         {!hasHatched ? (
@@ -185,13 +188,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 34,
+    right: -90,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 6,
     zIndex: 1,
   },
   centerContainer: {

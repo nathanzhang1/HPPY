@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import ExperimentModal from '../components/shop/ExperimentModal';
 import ItemPurchaseModal from '../components/shop/ItemPurchaseModal';
+import TextStroke from '../components/TextStroke';
 
 const { width } = Dimensions.get('window');
 
@@ -129,7 +130,9 @@ export default function ShopScreen({ navigation }) {
                 style={styles.headerWoodPlank}
                 resizeMode="stretch"
               />
-              <Text style={styles.sectionTitle}>Experiments</Text>
+              <TextStroke stroke={3} color="#75383B">
+                <Text style={styles.experimentsTitle}>Experiments</Text>
+              </TextStroke>
             </View>
 
             <View style={styles.experimentsRow}>
@@ -167,7 +170,9 @@ export default function ShopScreen({ navigation }) {
                 style={styles.headerWoodPlank}
                 resizeMode="stretch"
               />
-              <Text style={styles.sectionTitle}>Shop</Text>
+              <TextStroke stroke={3} color="#75383B">
+                <Text style={styles.shopTitle}>Shop</Text>
+              </TextStroke>
               
               <View style={styles.coinDisplay}>
                 <Image
@@ -301,16 +306,26 @@ const styles = StyleSheet.create({
     height: 900,
     top: -60,
   },
-  sectionTitle: {
+  experimentsTitle: {
     position: 'absolute',
     top: 8,
+    right: -100,
     fontFamily: 'Sigmar',
     fontSize: 28,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 6,
+    zIndex: 1,
+  },
+  shopTitle: {
+    position: 'absolute',
+    top: 8,
+    right: -45,
+    fontFamily: 'Sigmar',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    paddingHorizontal: 6,
     zIndex: 1,
   },
   coinDisplay: {

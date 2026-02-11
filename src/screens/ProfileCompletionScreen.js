@@ -17,6 +17,7 @@ import TempProgressBar from '../components/TempProgressBar';
 import LottieView from 'lottie-react-native';
 import ActivityInput from '../components/profile-completion/ActivityInput';
 import NotificationSlider from '../components/profile-completion/NotificationSlider';
+import TextStroke from '../components/TextStroke';
 
 const { width, height } = Dimensions.get('window');
 
@@ -152,7 +153,9 @@ export default function ProfileCompletionScreen({ navigation }) {
                 style={styles.woodPlank}
                 resizeMode="stretch"
               />
-              <Text style={styles.headerTitle}>{showSettingsMode ? 'Settings' : 'Complete Profile'}</Text>
+              <TextStroke stroke={3} color="#75383B">
+                <Text style={showSettingsMode ? styles.headerSettingsTitle : styles.headerTitle}>{showSettingsMode ? 'Settings' : 'Complete Profile'}</Text>
+              </TextStroke>
             </View>
 
             <View style={styles.contentWrapper}>
@@ -300,13 +303,23 @@ const styles = StyleSheet.create({
   headerTitle: {
     position: 'absolute',
     top: 35,
+    right: -152,
     fontFamily: 'Sigmar',
     fontSize: 32,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 6,
+    zIndex: 1,
+  },
+  headerSettingsTitle: {
+    position: 'absolute',
+    top: 35,
+    right: -76,
+    fontFamily: 'Sigmar',
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#F2DAB3',
+    paddingHorizontal: 6,
     zIndex: 1,
   },
   contentWrapper: {

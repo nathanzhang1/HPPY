@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import TempProgressBar from '../TempProgressBar';
+import TextStroke from '../TextStroke';
 
 export default function ProfileCard({ onPress, progress = 0, hasHatched = false }) {
   if (hasHatched) {
@@ -27,7 +28,9 @@ export default function ProfileCard({ onPress, progress = 0, hasHatched = false 
               style={styles.settingsWoodPlank}
               resizeMode="stretch"
             />
-            <Text style={styles.settingsTitle}>Settings</Text>
+            <TextStroke stroke={2} color="#75383B">
+              <Text style={styles.settingsTitle}>Settings</Text>
+            </TextStroke>
           </View>
         </View>
       </TouchableOpacity>
@@ -67,7 +70,9 @@ export default function ProfileCard({ onPress, progress = 0, hasHatched = false 
               style={styles.woodPlank}
               resizeMode="stretch"
             />
-            <Text style={styles.title}>Complete Profile</Text>
+            <TextStroke stroke={2} color="#75383B">
+              <Text style={styles.title}>Complete Profile</Text>
+            </TextStroke>
           </View>
           <Text style={styles.description}>
             Fill out your profile to hatch your first egg
@@ -177,12 +182,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 4,
     width: 220,
-    bottom: 5,
-    right: -45,
+    top: -15,
+    right: -41,
   },
   description: {
     fontSize: 17,
@@ -227,9 +230,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-    top: -12,
+    paddingHorizontal: 4,
+    top: -41,
+    right: -46,
   },
 });

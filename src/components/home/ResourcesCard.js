@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import TextStroke from '../TextStroke';
 
 export default function ResourcesCard({ onPress }) {
   return (
@@ -23,7 +24,9 @@ export default function ResourcesCard({ onPress }) {
           style={styles.woodPlank}
           resizeMode="stretch"
         />
-        <Text style={styles.title}>Resources</Text>
+        <TextStroke stroke={2} color="#75383B">
+          <Text style={styles.title}>Resources</Text>
+        </TextStroke>
       </View>
 
       <View style={styles.researchBubble}>
@@ -83,14 +86,13 @@ const styles = StyleSheet.create({
   },
   title: {
     position: 'absolute',
-    top: 33,
+    top: -466,
+    right: -58,
     fontFamily: 'Sigmar',
     fontSize: 20,
     fontWeight: 'bold',
     color: '#F2DAB3',
-    textShadowColor: '#75383B',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    paddingHorizontal: 4,
   },
   researchBubble: {
     position: 'absolute',
