@@ -19,7 +19,7 @@ const { width, height } = Dimensions.get('window');
 const getItemImage = (itemId) => {
   const itemImages = {
     1: require('../../assets/home/egg-icon.png'),
-    2: require('../../assets/shop/grass-skirt.png'),
+    2: require('../../assets/shop/hula-skirt.png'),
     3: require('../../assets/shop/shirt.png'),
     4: require('../../assets/shop/hat.png'),
     5: require('../../assets/shop/necklace.png'),

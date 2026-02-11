@@ -27,7 +27,7 @@ const CARD_WIDTH = (WOOD_PLANK_WIDTH - (GRID_PADDING * 2) - (CARD_GAP * (CARDS_P
 // Mock shop items - will be replaced with actual data later
 const SHOP_ITEMS = [
   { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95, purchasable: false },
-  { id: 2, name: 'Grass Skirt', price: 50, image: require('../../assets/shop/grass-skirt.png'), scale: 0.9, purchasable: true },
+  { id: 2, name: 'Hula Skirt', price: 50, image: require('../../assets/shop/hula-skirt.png'), scale: 0.9, purchasable: true },
   { id: 3, name: 'Shirt', price: 50, image: require('../../assets/shop/shirt.png'), scale: 1.0, purchasable: false },
   { id: 4, name: 'Hat', price: 50, image: require('../../assets/shop/hat.png'), scale: 1.2, purchasable: false },
   { id: 5, name: 'Necklace', price: 50, image: require('../../assets/shop/necklace.png'), scale: 1.1, purchasable: false },

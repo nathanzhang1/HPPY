@@ -8,14 +8,17 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
+import TextStroke from '../TextStroke';
 
 const { width } = Dimensions.get('window');
 
-// Available animals that can wear items
-const ANIMALS = [
-  { id: 'platypus', name: 'Platypus', image: require('../../../assets/profile-completion/platypus.png') },
-  { id: 'otter', name: 'Otter', image: require('../../../assets/profile-completion/platypus.png') },
-  { id: 'beaver', name: 'Beaver', image: require('../../../assets/profile-completion/platypus.png') },
+// Available animals with hula skirt variants
+// User will import these images - using placeholders for now
+const ANIMALS_WITH_SKIRT = [
+  { id: 'platypus', name: 'Platypus', image: require('../../../assets/shop/platypus-hula.png'), icon: require('../../../assets/shop/platypus-icon.png') },
+  { id: 'dinosaur', name: 'Dinosaur', image: require('../../../assets/shop/dinosaur-hula.png'), icon: require('../../../assets/shop/dinosaur-icon.png') },
+  { id: 'raccoon', name: 'Raccoon', image: require('../../../assets/shop/raccoon-hula.png'), icon: require('../../../assets/shop/raccoon-icon.png') },
+  { id: 'cat', name: 'Cat', image: require('../../../assets/shop/cat-hula.png'), icon: require('../../../assets/shop/cat-icon.png') },
 ];
 
 export default function ItemPurchaseModal({ 
@@ -38,12 +41,8 @@ export default function ItemPurchaseModal({
     }
   }, [visible]);
 
-  const handlePrevAnimal = () => {
-    setSelectedAnimal((prev) => (prev === 0 ? ANIMALS.length - 1 : prev - 1));
-  };
-
-  const handleNextAnimal = () => {
-    setSelectedAnimal((prev) => (prev === ANIMALS.length - 1 ? 0 : prev + 1));
+  const handleAnimalSelect = (index) => {
+    setSelectedAnimal(index);
   };
 
   const handleBuy = async () => {
@@ -79,66 +78,65 @@ export default function ItemPurchaseModal({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
+          {/* Close Button */}
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.closeButtonText}>✕</Text>
+          </TouchableOpacity>
+
           {!success ? (
             <>
-              <Text style={styles.title}>{item.name}</Text>
+              {/* Animal Preview */}
+              <View style={styles.animalPreview}>
+                <Image
+                  source={ANIMALS_WITH_SKIRT[selectedAnimal].image}
+                  style={styles.animalImage}
+                  resizeMode="contain"
+                />
+              </View>
 
-              <View style={styles.previewContainer}>
-                <TouchableOpacity 
-                  style={styles.navButton}
-                  onPress={handlePrevAnimal}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.navButtonText}>←</Text>
-                </TouchableOpacity>
+              {/* Animal Selector Buttons */}
+              <View style={styles.animalSelector}>
+                {ANIMALS_WITH_SKIRT.map((animal, index) => (
+                  <TouchableOpacity
+                    key={animal.id}
+                    style={[
+                      styles.animalButton,
+                      selectedAnimal === index && styles.animalButtonSelected
+                    ]}
+                    onPress={() => handleAnimalSelect(index)}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={animal.icon}
+                      style={styles.animalButtonIcon}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-                <View style={styles.animalContainer}>
+              {/* Title */}
+              <TextStroke stroke={3} color="#75383B">
+                <Text style={styles.title}>{item.name}</Text>
+              </TextStroke>
+
+              {/* Price and Buy Row */}
+              <View style={styles.actionRow}>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.priceText}>{item.price}</Text>
                   <Image
-                    source={ANIMALS[selectedAnimal].image}
-                    style={styles.animalImage}
-                    resizeMode="contain"
-                  />
-                  <Image
-                    source={item.image}
-                    style={styles.itemPreview}
+                    source={require('../../../assets/home/coin-icon.png')}
+                    style={styles.coinIcon}
                     resizeMode="contain"
                   />
                 </View>
 
                 <TouchableOpacity 
-                  style={styles.navButton}
-                  onPress={handleNextAnimal}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.navButtonText}>→</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.animalName}>{ANIMALS[selectedAnimal].name}</Text>
-
-              <View style={styles.priceContainer}>
-                <Image
-                  source={require('../../../assets/home/coin-icon.png')}
-                  style={styles.coinIcon}
-                  resizeMode="contain"
-                />
-                <Text style={styles.priceText}>{item.price}</Text>
-              </View>
-
-              {error && <Text style={styles.errorText}>{error}</Text>}
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={[styles.button, styles.cancelButton]}
-                  onPress={onClose}
-                  activeOpacity={0.8}
-                  disabled={purchasing}
-                >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={[styles.button, styles.buyButton]}
+                  style={styles.buyButton}
                   onPress={handleBuy}
                   activeOpacity={0.8}
                   disabled={purchasing}
@@ -148,6 +146,11 @@ export default function ItemPurchaseModal({
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Error Message */}
+              {error && (
+                <Text style={styles.errorText}>{error}</Text>
+              )}
             </>
           ) : (
             <View style={styles.successContainer}>
@@ -166,126 +169,121 @@ export default function ItemPurchaseModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContainer: {
-    width: width * 0.85,
-    backgroundColor: '#FDF8EF',
-    borderRadius: 16,
-    borderWidth: 2,
+    width: width * 0.8,
+    maxWidth: 480,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderBottomWidth: 12,
     borderColor: '#75383B',
     padding: 24,
+    paddingTop: 20,
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  closeButtonText: {
+    fontSize: 32,
+    fontWeight: '400',
     color: '#75383B',
-    marginBottom: 20,
-    textAlign: 'center',
   },
-  previewContainer: {
-    flexDirection: 'row',
+  animalPreview: {
+    marginTop: 8,
+    marginBottom: 4,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    width: '100%',
-  },
-  navButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F2DAB3',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#75383B',
-  },
-  navButtonText: {
-    fontSize: 24,
-    color: '#75383B',
-    fontWeight: '700',
-  },
-  animalContainer: {
-    width: 150,
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    position: 'relative',
   },
   animalImage: {
     width: 120,
     height: 120,
   },
-  itemPreview: {
-    position: 'absolute',
-    bottom: 10,
-    width: 60,
-    height: 60,
-  },
-  animalName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#75383B',
+  animalSelector: {
+    flexDirection: 'row',
+    gap: 4,
     marginBottom: 16,
+  },
+  animalButton: {
+    width: 34,
+    height: 34,
+    backgroundColor: '#F2DAB3',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  animalButtonSelected: {
+    opacity: 0.5,
+  },
+  animalButtonIcon: {
+    width: 28,
+    height: 28,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '400',
+    fontFamily: 'Sigmar',
+    color: '#F2DAB3',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+    marginBottom: 16,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F2DAB3',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  coinIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    height: 28,
   },
   priceText: {
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#75383B',
+    marginRight: 4,
+  },
+  coinIcon: {
+    width: 16,
+    height: 16,
+  },
+  buyButton: {
+    backgroundColor: '#F2DAB3',
+    paddingVertical: 4,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    height: 28,
+    justifyContent: 'center',
+  },
+  buyButtonText: {
+    fontSize: 16,
     fontWeight: '700',
     color: '#75383B',
   },
   errorText: {
     color: '#FF3B30',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    marginBottom: 16,
+    marginTop: 12,
     textAlign: 'center',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#75383B',
-  },
-  cancelButtonText: {
-    color: '#75383B',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  buyButton: {
-    backgroundColor: '#75383B',
-  },
-  buyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
   },
   successContainer: {
     paddingVertical: 40,

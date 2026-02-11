@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
+import TextStroke from '../TextStroke';
 
 const { width } = Dimensions.get('window');
 
@@ -15,42 +16,44 @@ export default function ExperimentModal({ visible, onClose, type }) {
   const isDailyExercise = type === 'dailyExercise';
   
   const config = isDailyExercise ? {
-    backgroundColor: '#5494D1',
+    backgroundColor: '#5E9BD3',
+    borderColor: '#284275',
     title: 'Daily Exercise',
     titleColor: '#C1E4EF',
+    titleStroke: '#284275',
     description: 'Log a workout every day for 7 days to unlock this pack and see how it impacts your happiness!',
     descriptionColor: '#284275',
     progressCount: 7,
-    progressFilled: '#2D4574',
-    progressEmpty: '#C1E4EF',
-    progressTick: '#C1E4EF',
     checkedCount: 2,
-    // Placeholder - user will import actual images
+    progressEmpty: '#C1E4EF',
+    progressFilled: '#2D4574',
+    progressTick: '#C1E4EF',
     badgeImage: require('../../../assets/shop/daily-exercise-badge.png'),
     items: [
-      require('../../../assets/shop/daily-exercise-item1.png'), // item1
-      require('../../../assets/shop/daily-exercise-item2.png'), // item2
-      require('../../../assets/shop/daily-exercise-item3.png'), // item3
-      require('../../../assets/shop/daily-exercise-item4.png'), // item4
+      require('../../../assets/shop/daily-exercise-item1.png'),
+      require('../../../assets/shop/daily-exercise-item2.png'),
+      require('../../../assets/shop/daily-exercise-item3.png'),
+      require('../../../assets/shop/daily-exercise-item4.png'),
     ]
   } : {
-    backgroundColor: '#828953',
+    backgroundColor: '#8C9461',
+    borderColor: '#282B19',
     title: 'Weekend Vacations',
     titleColor: '#F0DAB0',
+    titleStroke: '#282B19',
     description: 'Do something outside of your neighborhood on the weekend 4 times in the next 2 months. Log activity somewhere you don\'t usually go to unlock this pack.',
     descriptionColor: '#282B19',
     progressCount: 4,
-    progressFilled: '#282B19',
-    progressEmpty: '#F0DAB0',
-    progressTick: '#F0DAB0',
     checkedCount: 1,
-    // Placeholder - user will import actual images
+    progressEmpty: '#F0DAB0',
+    progressFilled: '#282B19',
+    progressTick: '#F0DAB0',
     badgeImage: require('../../../assets/shop/weekend-vacations-badge.png'),
     items: [
-      require('../../../assets/shop/weekend-vacations-item1.png'), // item1
-      require('../../../assets/shop/weekend-vacations-item2.png'), // item2
-      require('../../../assets/shop/weekend-vacations-item3.png'), // item3
-      require('../../../assets/shop/weekend-vacations-item4.png'), // item4
+      require('../../../assets/shop/weekend-vacations-item1.png'),
+      require('../../../assets/shop/weekend-vacations-item2.png'),
+      require('../../../assets/shop/weekend-vacations-item3.png'),
+      require('../../../assets/shop/weekend-vacations-item4.png'),
     ]
   };
 
@@ -94,17 +97,20 @@ export default function ExperimentModal({ visible, onClose, type }) {
           </View>
 
           {/* Title */}
-          <Text 
-            style={[
-              styles.title, 
-              { 
-                color: config.titleColor,
-                lineHeight: isDailyExercise ? 42 : 37,
-              }
-            ]}
-          >
-            {config.title}
-          </Text>
+          <TextStroke stroke={3} color={config.titleStroke}>
+            <Text 
+              style={[
+                styles.title, 
+                { 
+                  color: config.titleColor,
+                  lineHeight: isDailyExercise ? 42 : 22,
+                  paddingTop: isDailyExercise ? 5 : 20,
+                }
+              ]}
+            >
+              {config.title}
+            </Text>
+          </TextStroke>
 
           {/* Description */}
           <Text style={[styles.description, { color: config.descriptionColor }]}>
@@ -204,6 +210,8 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     textAlign: 'center',
     fontFamily: 'Sigmar',
+    paddingHorizontal: 10,
+    marginBottom: 12,
   },
   description: {
     fontSize: 14,

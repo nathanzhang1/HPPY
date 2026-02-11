@@ -193,8 +193,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   backgroundImage: {
-    width: width * 1.05,
-    height: height,
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
   safeArea: {
     flex: 1,
