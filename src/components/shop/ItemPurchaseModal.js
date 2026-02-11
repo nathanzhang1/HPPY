@@ -26,17 +26,18 @@ export default function ItemPurchaseModal({
   onClose, 
   item,
   userCoins,
-  onPurchase 
+  onPurchase,
+  navigation
 }) {
   const [selectedAnimal, setSelectedAnimal] = useState(0);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setError('');
-      setSuccess(false);
+      setSuccess(true);
       setSelectedAnimal(0);
     }
   }, [visible]);
@@ -49,7 +50,7 @@ export default function ItemPurchaseModal({
     setError('');
     
     if (userCoins < item.price) {
-      setError("You don't have enough coins!");
+      setError("Looks like you don't have enough coins! Continue logging activities to purchase");
       return;
     }
 
@@ -57,13 +58,17 @@ export default function ItemPurchaseModal({
     try {
       await onPurchase(item);
       setSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 1500);
     } catch (err) {
       setError(err.message || 'Purchase failed');
     } finally {
       setPurchasing(false);
+    }
+  };
+
+  const handleGoToSanctuary = () => {
+    onClose();
+    if (navigation) {
+      navigation.navigate('Sanctuary');
     }
   };
 
@@ -77,7 +82,7 @@ export default function ItemPurchaseModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, success && styles.successModalContainer]}>
           {/* Close Button */}
           <TouchableOpacity 
             style={styles.closeButton}
@@ -153,11 +158,30 @@ export default function ItemPurchaseModal({
               )}
             </>
           ) : (
-            <View style={styles.successContainer}>
-              <Text style={styles.successText}>Purchase Successful!</Text>
-              <Text style={styles.successSubtext}>
-                The item has been added to your inventory
-              </Text>
+            <View style={styles.successContent}>
+              {/* Left: Platypus with Hula Skirt */}
+              <View style={styles.successLeft}>
+                <Image
+                  source={require('../../../assets/shop/platypus-hula.png')}
+                  style={styles.successAnimalImage}
+                  resizeMode="contain"
+                />
+              </View>
+
+              {/* Right: Text and Button */}
+              <View style={styles.successRight}>
+                <Text style={styles.successText}>
+                  Try on items in the fitting room in the sanctuary!
+                </Text>
+                
+                <TouchableOpacity 
+                  style={styles.sanctuaryButton}
+                  onPress={handleGoToSanctuary}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.sanctuaryButtonText}>Sanctuary</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
@@ -279,26 +303,58 @@ const styles = StyleSheet.create({
     color: '#75383B',
   },
   errorText: {
-    color: '#FF3B30',
+    color: '#75383B',
     fontSize: 13,
     fontWeight: '600',
-    marginTop: 12,
+    marginTop: 24,
     textAlign: 'center',
   },
-  successContainer: {
-    paddingVertical: 40,
+  successModalContainer: {
+    width: width * 0.8,
+    maxWidth: 420,
+    paddingVertical: 10,
+    paddingTop: 45,
+    paddingHorizontal: 10,
+  },
+  successContent: {
+    flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
+    gap: 40,
+  },
+  successLeft: {
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successAnimalImage: {
+    width: 120,
+    height: 120,
+    left: 5,
+  },
+  successRight: {
+    flex: 1,
+    alignItems: 'flex-start',
+    gap: 16,
   },
   successText: {
-    fontSize: 24,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#75383B',
+    textAlign: 'left',
+    lineHeight: 22,
+  },
+  sanctuaryButton: {
+    backgroundColor: '#F2DAB3',
+    paddingHorizontal: 16,
+    paddingVertical: 5,
+    borderRadius: 20,
+    alignSelf: 'flex-end',
+  },
+  sanctuaryButtonText: {
+    fontSize: 17,
     fontWeight: '700',
     color: '#75383B',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  successSubtext: {
-    fontSize: 16,
-    color: '#000000',
     textAlign: 'center',
   },
 });

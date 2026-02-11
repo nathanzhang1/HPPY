@@ -266,6 +266,7 @@ export default function ShopScreen({ navigation }) {
         item={selectedItem}
         userCoins={coins}
         onPurchase={handlePurchase}
+        navigation={navigation}
       />
     </View>
   );
