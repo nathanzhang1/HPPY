@@ -116,13 +116,13 @@ router.post('/recommended-activities', (req, res) => {
 
     // Start transaction
     const deleteStmt = db.prepare('DELETE FROM recommended_activities WHERE user_id = ?');
-    const insertStmt = db.prepare('INSERT INTO recommended_activities (user_id, activity_name) VALUES (?, ?)');
+    const insertStmt = db.prepare('INSERT OR IGNORE INTO recommended_activities (user_id, activity_name) VALUES (?, ?)');
 
     const transaction = db.transaction(() => {
       // Clear existing activities
       deleteStmt.run(userId);
 
-      // Insert new activities
+      // Insert new activities (duplicates will be ignored due to UNIQUE constraint)
       activities.forEach(activity => {
         if (activity && activity.trim()) {
           insertStmt.run(userId, activity.trim());
@@ -158,9 +158,9 @@ router.post('/purchase', (req, res) => {
       return res.status(400).json({ error: 'Item ID, name, and price are required' });
     }
 
-    // Get user's current coins and items
+    // Get user's current coins, items, and animals
     const user = db.prepare(
-      'SELECT coins, items FROM users WHERE id = ?'
+      'SELECT coins, items, animals FROM users WHERE id = ?'
     ).get(userId);
 
     if (!user) {
@@ -169,13 +169,45 @@ router.post('/purchase', (req, res) => {
 
     const currentCoins = user.coins || 0;
     const currentItems = JSON.parse(user.items || '[]');
+    const currentAnimals = JSON.parse(user.animals || '[]');
 
     // Check if user has enough coins
     if (currentCoins < price) {
       return res.status(400).json({ error: 'Not enough coins' });
     }
 
-    // Deduct coins and add item (allow duplicates with purchaseTime)
+    // Handle egg purchase (itemId === 1)
+    if (itemId === 1) {
+      // Shop eggs can only hatch cat, dinosaur, or raccoon (platypus is from profile completion)
+      const availableAnimals = ['cat', 'dinosaur', 'raccoon'];
+      const unownedAnimals = availableAnimals.filter(animal => !currentAnimals.includes(animal));
+
+      if (unownedAnimals.length === 0) {
+        return res.status(400).json({ error: 'You have already collected all animals' });
+      }
+
+      // Randomly select an animal from unowned animals
+      const randomIndex = Math.floor(Math.random() * unownedAnimals.length);
+      const newAnimal = unownedAnimals[randomIndex];
+
+      const newAnimals = [...currentAnimals, newAnimal];
+      const newCoins = currentCoins - price;
+
+      db.prepare(
+        'UPDATE users SET coins = ?, animals = ? WHERE id = ?'
+      ).run(newCoins, JSON.stringify(newAnimals), userId);
+
+      console.log(`Shop egg hatched! New animal: ${newAnimal}`);
+
+      return res.json({ 
+        coins: newCoins,
+        animals: newAnimals,
+        hatchedAnimal: newAnimal,
+        message: 'Egg purchased and hatched successfully'
+      });
+    }
+
+    // Regular item purchase
     const newItem = {
       id: itemId,
       name: itemName,
@@ -184,23 +216,6 @@ router.post('/purchase', (req, res) => {
       purchaseTime: Date.now()
     };
     let newItems = [...currentItems, newItem];
-
-    // FOR TESTING: Add extra items when hula skirt (id: 2) is bought for the first time
-    // Only add if user has NO hula skirts currently
-    const hulaSkirtCount = currentItems.filter(item => item.id === 2).length;
-    if (itemId === 2 && hulaSkirtCount === 0) {
-      const testItems = [
-        { id: 3, name: 'Shirt', equipped: false, animal: null, purchaseTime: Date.now() + 1 },
-        { id: 4, name: 'Hat', equipped: false, animal: null, purchaseTime: Date.now() + 2 },
-        { id: 5, name: 'Necklace', equipped: false, animal: null, purchaseTime: Date.now() + 3 },
-        { id: 6, name: 'Snorkel', equipped: false, animal: null, purchaseTime: Date.now() + 4 },
-        { id: 7, name: 'Floatie', equipped: false, animal: null, purchaseTime: Date.now() + 5 },
-        { id: 8, name: 'Flippers', equipped: false, animal: null, purchaseTime: Date.now() + 6 },
-        { id: 9, name: 'Swimsuit', equipped: false, animal: null, purchaseTime: Date.now() + 7 },
-      ];
-      newItems = [...newItems, ...testItems];
-      console.log('First hula skirt purchase - added test items (shirt, hat, necklace, snorkel, floatie, flippers, swimsuit)');
-    }
 
     const newCoins = currentCoins - price;
 

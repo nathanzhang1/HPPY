@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import ExperimentModal from '../components/shop/ExperimentModal';
 import ItemPurchaseModal from '../components/shop/ItemPurchaseModal';
+import EggPurchaseModal from '../components/shop/EggPurchaseModal';
 import TextStroke from '../components/TextStroke';
 
 const { width } = Dimensions.get('window');
@@ -27,7 +28,7 @@ const CARD_WIDTH = (WOOD_PLANK_WIDTH - (GRID_PADDING * 2) - (CARD_GAP * (CARDS_P
 
 // Mock shop items - will be replaced with actual data later
 const SHOP_ITEMS = [
-  { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95, purchasable: false },
+  { id: 1, name: 'Egg', price: 200, image: require('../../assets/home/egg-icon.png'), scale: 0.95, purchasable: true },
   { id: 2, name: 'Hula Skirt', price: 50, image: require('../../assets/shop/hula-skirt.png'), scale: 0.9, purchasable: true },
   { id: 3, name: 'Shirt', price: 50, image: require('../../assets/shop/shirt.png'), scale: 1.0, purchasable: false },
   { id: 4, name: 'Hat', price: 50, image: require('../../assets/shop/hat.png'), scale: 1.2, purchasable: false },
@@ -41,11 +42,14 @@ const SHOP_ITEMS = [
 export default function ShopScreen({ navigation }) {
   const [coins, setCoins] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [animals, setAnimals] = useState([]);
+  const [hasHatched, setHasHatched] = useState(false);
   
   // Modal states
   const [dailyExerciseModal, setDailyExerciseModal] = useState(false);
   const [weekendVacationsModal, setWeekendVacationsModal] = useState(false);
   const [itemPurchaseModal, setItemPurchaseModal] = useState(false);
+  const [eggPurchaseModal, setEggPurchaseModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   useFocusEffect(
@@ -58,6 +62,8 @@ export default function ShopScreen({ navigation }) {
     try {
       const settingsData = await api.getUserSettings();
       setCoins(settingsData.coins || 0);
+      setAnimals(settingsData.animals || []);
+      setHasHatched(settingsData.has_hatched || false);
     } catch (error) {
       console.error('Failed to load user data:', error);
     } finally {
@@ -81,7 +87,13 @@ export default function ShopScreen({ navigation }) {
     if (!item.purchasable) return;
     
     setSelectedItem(item);
-    setItemPurchaseModal(true);
+    if (item.id === 1) {
+      // Egg item - use EggPurchaseModal
+      setEggPurchaseModal(true);
+    } else {
+      // Regular item - use ItemPurchaseModal
+      setItemPurchaseModal(true);
+    }
   };
 
   const handlePurchase = async (item) => {
@@ -91,8 +103,15 @@ export default function ShopScreen({ navigation }) {
       console.log('ShopScreen - Purchase response:', response);
       setCoins(response.coins);
       
-      // Reload user data to get updated items
+      // If egg was purchased, update animals list
+      if (response.animals) {
+        setAnimals(response.animals);
+      }
+      
+      // Reload user data to get updated items/animals
       await loadUserData();
+      
+      return response; // Return response for modal to handle
     } catch (error) {
       console.error('ShopScreen - Purchase error:', error);
       throw new Error(error.message || 'Purchase failed');
@@ -183,7 +202,15 @@ export default function ShopScreen({ navigation }) {
             </View>
 
             <View style={styles.shopGrid}>
-              {SHOP_ITEMS.map((item) => {
+              {SHOP_ITEMS
+                .filter(item => {
+                  // Hide egg (id: 1) until user has hatched their first egg
+                  if (item.id === 1 && !hasHatched) {
+                    return false;
+                  }
+                  return true;
+                })
+                .map((item) => {
                 return (
                   <TouchableOpacity
                     key={item.id}
@@ -259,6 +286,18 @@ export default function ShopScreen({ navigation }) {
         userCoins={coins}
         onPurchase={handlePurchase}
         navigation={navigation}
+      />
+      
+      <EggPurchaseModal
+        visible={eggPurchaseModal}
+        onClose={() => {
+          setEggPurchaseModal(false);
+          setSelectedItem(null);
+        }}
+        userCoins={coins}
+        onPurchase={handlePurchase}
+        navigation={navigation}
+        allAnimalsCollected={animals.length >= 4 || (animals.includes('cat') && animals.includes('dinosaur') && animals.includes('raccoon'))}
       />
     </View>
   );

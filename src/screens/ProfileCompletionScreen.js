@@ -86,9 +86,21 @@ export default function ProfileCompletionScreen({ navigation }) {
     if (animationRef.current) {
       animationRef.current.play();
     }
-    // Save that egg has hatched
+    // Save that egg has hatched and add platypus to animals
     try {
-      await api.updateUserSettings({ has_hatched: true });
+      // Get current animals array
+      const settingsData = await api.getUserSettings();
+      const currentAnimals = settingsData.animals || [];
+      
+      // Add platypus if not already there (should always be empty on first hatch)
+      if (!currentAnimals.includes('platypus')) {
+        await api.updateUserSettings({ 
+          has_hatched: true,
+          animals: [...currentAnimals, 'platypus']
+        });
+      } else {
+        await api.updateUserSettings({ has_hatched: true });
+      }
     } catch (error) {
       console.error('Failed to update hatched status:', error);
     }

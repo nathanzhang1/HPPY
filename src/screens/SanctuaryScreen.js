@@ -19,8 +19,8 @@ const { width, height } = Dimensions.get('window');
 export default function SanctuaryScreen({ navigation }) {
   const [hasHatched, setHasHatched] = useState(false);
   const [animals, setAnimals] = useState([]);
+  const [items, setItems] = useState([]);
   const [recommendedActivities, setRecommendedActivities] = useState([]);
-  const [equippedItemId, setEquippedItemId] = useState(null); // Track equipped item
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -38,12 +38,8 @@ export default function SanctuaryScreen({ navigation }) {
 
       setHasHatched(settingsData.has_hatched);
       setAnimals(settingsData.animals || []);
+      setItems(settingsData.items || []);
       setRecommendedActivities(activitiesData.activities || []);
-      
-      // Find equipped item for platypus
-      const userItems = settingsData.items || [];
-      const equippedItem = userItems.find(item => item.equipped && item.animal === 'platypus');
-      setEquippedItemId(equippedItem ? equippedItem.id : null);
     } catch (error) {
       console.error('Failed to load sanctuary data:', error);
     } finally {
@@ -51,11 +47,32 @@ export default function SanctuaryScreen({ navigation }) {
     }
   };
 
-  const getPlatypusImage = () => {
-    if (equippedItemId === 2) { // Hula skirt
-      return require('../../assets/shop/platypus-hula.png');
+  const getAnimalImage = (animal, items) => {
+    // Find equipped item for this animal
+    const equippedItem = items.find(item => item.equipped && item.animal === animal);
+    
+    if (equippedItem && equippedItem.id === 2) { // Hula skirt
+      const hulaImages = {
+        platypus: require('../../assets/shop/platypus-hula.png'),
+        cat: require('../../assets/shop/cat-hula.png'),
+        dinosaur: require('../../assets/shop/dinosaur-hula.png'),
+        raccoon: require('../../assets/shop/raccoon-hula.png'),
+      };
+      return { source: hulaImages[animal], hasHula: true };
     }
-    return require('../../assets/profile-completion/platypus.png');
+    
+    // Default animal images
+    const animalImages = {
+      platypus: require('../../assets/sanctuary/platypus.png'),
+      cat: require('../../assets/sanctuary/cat.png'),
+      dinosaur: require('../../assets/sanctuary/dinosaur.png'),
+      raccoon: require('../../assets/sanctuary/raccoon.png'),
+    };
+    return { source: animalImages[animal] || animalImages.platypus, hasHula: false };
+  };
+
+  const handleAnimalPress = (animal) => {
+    navigation.navigate('FittingRoom', { selectedAnimal: animal });
   };
 
   const handleFittingRoomPress = () => {
@@ -136,19 +153,63 @@ export default function SanctuaryScreen({ navigation }) {
             </View>
           </View>
         ) : (
-          // After hatching: Show platypus and buttons
+          // After hatching: Show animals with manual positioning
           <View style={styles.hatchedContent}>
-            <TouchableOpacity 
-              style={styles.platypusContainer}
-              onPress={handleFittingRoomPress}
-              activeOpacity={0.8}
-            >
-              <Image
-                source={getPlatypusImage()}
-                style={styles.platypusImage}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+            {animals.map((animal, index) => {
+              // Manual position adjustments for each animal
+              // Adjust 'top' and 'left' values to position each animal
+              // width / 2 - 53 centers the animal horizontally (106 width / 2 = 53)
+              const animalPositions = {
+                platypus: { 
+                  top: 500,           // Vertical position from top
+                  left: width / 2 + 40, // Horizontal position (centered)
+                  zIndex: 1,
+                },
+                cat: { 
+                  top: 500,           // Adjust Y position
+                  left: width / 2 - 150, // Adjust X position
+                  zIndex: 1,
+                },
+                dinosaur: { 
+                  top: 450,           // Adjust Y position
+                  left: width / 2 - 53, // Adjust X position
+                  zIndex: 1,
+                },
+                raccoon: { 
+                  top: 550,           // Adjust Y position
+                  left: width / 2 - 53, // Adjust X position
+                  zIndex: 2,
+                },
+              };
+
+              const position = animalPositions[animal] || { top: 200, left: width / 2 - 53, zIndex: 1 };
+              const animalImageData = getAnimalImage(animal, items);
+
+              return (
+                <TouchableOpacity
+                  key={`${animal}-${index}`}
+                  style={[
+                    styles.animalContainer,
+                    {
+                      top: position.top,
+                      left: position.left,
+                      zIndex: position.zIndex,
+                    }
+                  ]}
+                  onPress={() => handleAnimalPress(animal)}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={animalImageData.source}
+                    style={[
+                      styles.animalImage,
+                      animalImageData.hasHula && { transform: [{ scale: 1.3 }] }
+                    ]}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              );
+            })}
 
             <View style={styles.buttonRow}>
               <TouchableOpacity 
@@ -295,13 +356,15 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  platypusContainer: {
+  animalContainer: {
     position: 'absolute',
-    bottom: '20%',
-    left: '50%',
-    // transform: [{ translateX: -53 }, { translateY: -53 }],
+    width: 106,
+    height: 106,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Position will be set inline based on animal type
   },
-  platypusImage: {
+  animalImage: {
     width: 106,
     height: 106,
   },
