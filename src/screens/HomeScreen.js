@@ -77,7 +77,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const handleResourcesPress = () => {
-    console.log('Navigate to Resources');
+    navigation.navigate('Resources');
   };
 
   const handleSignOut = async () => {
