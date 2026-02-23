@@ -1,8 +1,31 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-// Use your machine's local IP for physical device testing, or localhost for simulators
-// const API_URL = 'http://localhost:3000/api';
-const API_URL = 'https://rightable-polymeric-katherina.ngrok-free.dev/api';
+// Auto-detect backend URL (priority order):
+// 1. EXPO_PUBLIC_API_URL — set automatically when running `npm run tunnel`
+// 2. Web browser — backend is also on localhost
+// 3. Device/simulator (LAN mode) — same IP as the Expo dev server, port 3000
+const getApiUrl = () => {
+  // eslint-disable-next-line no-undef
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    // eslint-disable-next-line no-undef
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  if (Platform.OS === 'web') {
+    return 'http://localhost:3000/api';
+  }
+  // Constants.expoConfig.hostUri looks like "192.168.1.5:8081"
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    return `http://${host}:3000/api`;
+  }
+  return 'http://localhost:3000/api';
+};
+
+const API_URL = getApiUrl();
+
 
 const TOKEN_KEY = 'auth_token';
 
@@ -24,18 +47,11 @@ class ApiService {
     
     const headers = {
       'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning page
       ...options.headers,
     };
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    console.log(`API Request: ${options.method || 'GET'} ${API_URL}${endpoint}`);
-    console.log('Headers:', headers);
-    if (options.body) {
-      console.log('Body:', options.body);
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
