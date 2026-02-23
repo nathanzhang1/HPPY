@@ -16,15 +16,15 @@ import TextStroke from '../components/TextStroke';
 const { width } = Dimensions.get('window');
 
 const MENTAL_HEALTH_RESOURCES = [
-  { label: 'Find a Therapist', buttonText: 'More', url: 'https://www.psychologytoday.com/us/therapists' },
-  { label: 'Crisis Helplines', buttonText: 'More', url: 'https://www.samhsa.gov/find-help/national-helpline' },
-  { label: 'Support Groups', buttonText: 'More', url: 'https://www.nami.org/Support-Education/Support-Groups' },
+  { label: 'Find a Therapist', buttonText: 'More', url: 'https://www.psychologytoday.com' },
+  { label: 'Crisis Helplines', buttonText: 'More', url: 'https://www.crisistextline.org' },
+  { label: 'Support Groups', buttonText: 'More', url: 'https://www.supportgroupscentral.com' },
 ];
 
 const HAPPINESS_RESOURCES = [
-  { label: 'The Science of Joy', buttonText: 'Read', url: 'https://www.apa.org/topics/positive-psychology' },
+  { label: 'The Science of Joy', buttonText: 'Read', url: 'https://www.authentichappiness.sas.upenn.edu' },
   { label: 'Gratitude Practices', buttonText: 'More', url: 'https://greatergood.berkeley.edu/topic/gratitude' },
-  { label: 'Mindfullness', buttonText: 'More', url: 'https://www.mindful.org/what-is-mindfulness/' },
+  { label: 'Mindfulness', buttonText: 'More', url: 'https://www.mindful.org' },
 ];
 
 function ResourceRow({ label, buttonText, url }) {
